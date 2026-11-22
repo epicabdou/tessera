@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ErrorNotice } from '../components/ErrorNotice'
 import { CloseIcon, FileIcon, PlusIcon } from '../components/icons'
 import { call, toError, type ConversionEngines, type ConvertedPdf, type OfficeKind } from '../lib/bridge'
@@ -72,9 +72,22 @@ function OfficeToPdf({ kind }: { kind: OfficeKind }) {
   const [notice, setNotice] = useState<Error | null>(null)
   const seq = useRef(1)
 
+  // Tools stay mounted, so this runs once per session; "Check again" re-detects after an install.
+  const [checking, setChecking] = useState(true)
+  const detect = useCallback(
+    () =>
+      call('conversion_engines')
+        .then(setEngines, (err) => setNotice(toError(err)))
+        .finally(() => setChecking(false)),
+    [],
+  )
   useEffect(() => {
-    call('conversion_engines').then(setEngines, (err) => setNotice(toError(err)))
-  }, [])
+    void detect()
+  }, [detect])
+  const checkAgain = () => {
+    setChecking(true)
+    void detect()
+  }
 
   function add(paths: string[]) {
     const ok = paths.filter((p) => exts.includes(extOf(p)))
@@ -129,9 +142,14 @@ function OfficeToPdf({ kind }: { kind: OfficeKind }) {
       </header>
 
       {missing ? (
-        <div className="notice notice-error">
-          Converting {info.label.toLowerCase()} needs {info.app} (part of Microsoft 365) or the free LibreOffice. Install either one, then
-          reopen this tool.
+        <div className="notice notice-error engine-missing">
+          <span>
+            Converting {info.label.toLowerCase()} needs {info.app} (part of Microsoft 365) or the free LibreOffice. Install either one,
+            then check again.
+          </span>
+          <button type="button" className="btn btn-secondary btn-sm" disabled={checking} onClick={checkAgain}>
+            {checking ? 'Checking…' : 'Check again'}
+          </button>
         </div>
       ) : (
         <div className="engine-line">

@@ -145,3 +145,11 @@ def test_repair_hopeless(tmp_path):
     junk.write_bytes(b"%PDF-1.7\nnothing to see here")
     with pytest.raises(ValueError, match="too damaged"):
         optimize.repair(str(junk), str(tmp_path / "out.pdf"))
+
+
+def test_certificate_password_minimum_matches_the_form(tmp_path):
+    # frontend/src/security/SignPdf.tsx asks for 6+ characters; the backend must agree.
+    assert sign.MIN_CERT_PASSWORD == 6
+    with pytest.raises(ValueError, match="at least 6"):
+        sign.create_certificate(str(tmp_path / "me"), "12345", "Amina Benali")
+    assert sign.create_certificate(str(tmp_path / "me"), "123456", "Amina Benali")["path"].endswith(".pfx")

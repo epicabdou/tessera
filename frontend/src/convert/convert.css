@@ -287,3 +287,16 @@
     max-width: 45%;
   }
 }
+
+/* "Needs Office or LibreOffice" notice, with its Check again button. */
+.engine-missing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.engine-missing span {
+  flex: 1;
+  min-width: 240px;
+}

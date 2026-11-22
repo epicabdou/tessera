@@ -492,6 +492,8 @@ export interface PyApi {
     options: Record<string, unknown>,
   ): Promise<ConvertedPdf>
   suggest_pdf_path(source: string | null, hint: string): Promise<string>
+  /** Like suggest_pdf_path, for any extension; `source` is a local file, never a web address. */
+  suggest_output_path(source: string | null, hint: string, ext: string): Promise<string>
   image_thumbnails(paths: string[], size: number): Promise<ImageThumb[]>
   images_to_pdf(items: { path: string; rotate: number }[], output: string, options: ImagePdfOptions): Promise<SavedPdf>
   images_to_pdfs(items: { path: string; rotate: number }[], outputDir: string | null, options: ImagePdfOptions): Promise<SavedPdf[]>

@@ -47,6 +47,7 @@ class Components:
         self._dir = data_dir / "tectonic"
         self._lock = threading.Lock()
         self._state = {"state": "unknown", "progress": 0.0, "error": None}
+        self._running = False  # ensure_latex in progress (claimed under the lock)
 
     # --- status ------------------------------------------------------------------
 
@@ -62,8 +63,12 @@ class Components:
         chosen = latex.pick_engine(engines)
         with self._lock:
             state = dict(self._state)
+            running = self._running
         if chosen and state["state"] in ("unknown", "missing", "error"):
             state = {"state": "ready", "progress": 1.0, "error": None}
+        elif not chosen and state["state"] == "unknown" and not running:
+            # Nothing installed and no setup under way (it never started): offer to install.
+            state = {"state": "missing", "progress": 0.0, "error": None}
         return {"latex": {**state, "engine": chosen[0] if chosen else None, "engines": engines}}
 
     def _set(self, **changes) -> None:
@@ -73,22 +78,34 @@ class Components:
     # --- install -------------------------------------------------------------------
 
     def ensure_latex(self) -> None:
-        """Install and warm up Tectonic unless some LaTeX engine is already usable. Safe to call twice."""
+        """Install and warm up Tectonic unless some LaTeX engine is already usable. Safe to call twice,
+        even at once (start-up and an "Install now" click): the second call returns straight away."""
         with self._lock:
-            if self._state["state"] in ("downloading", "installing", "warming"):
+            if self._running:
                 return
+            self._running = True
+        try:
+            self._ensure_latex()
+        finally:
+            with self._lock:
+                self._running = False
+
+    def _ensure_latex(self) -> None:
         chosen = latex.pick_engine(self.latex_engines())
         if chosen and (chosen[0] != "tectonic" or (self._dir / ".warmed").is_file()):
             self._set(state="ready", progress=1.0, error=None)
             return
         try:
             started = time.monotonic()
-            if not Path(self.tectonic_path).is_file():
+            if chosen:
+                exe = chosen[1]  # a Tectonic already here (ours, or one on PATH): just warm it up
+            else:
                 log.info("No LaTeX engine found: downloading Tectonic %s", TECTONIC_VERSION)
                 self._download()
-            self._warm_up()
+                exe = self.tectonic_path
+            self._warm_up(exe)
             self._set(state="ready", progress=1.0, error=None)
-            log.info("LaTeX engine ready (Tectonic %s, set up in %.0f s)", TECTONIC_VERSION, time.monotonic() - started)
+            log.info("LaTeX engine ready (Tectonic at %s, set up in %.0f s)", exe, time.monotonic() - started)
         except Exception as exc:  # noqa: BLE001 - reported to the UI, retried next start
             log.exception("LaTeX engine setup failed")
             self._set(state="error", error=str(exc))
@@ -121,16 +138,18 @@ class Components:
                     shutil.copyfileobj(src, dst)
             replace_with_retry(staged, self.tectonic_path)
 
-    def _warm_up(self) -> None:
-        """First compile fetches Tectonic's core TeX files, so the user's first compile is quick."""
+    def _warm_up(self, exe: str) -> None:
+        """First compile fetches Tectonic's core TeX files, so the user's first compile is quick.
+        The cache is per user, whichever tectonic.exe fills it."""
         if (self._dir / ".warmed").is_file():
             return
         self._set(state="warming", progress=1.0)
         with tempfile.TemporaryDirectory(prefix="toolbox-latex-warm-") as tmp:
             doc = Path(tmp) / "warmup.tex"
             doc.write_text(WARM_UP, encoding="utf-8")
-            result = latex.compile_tex(str(doc), "tectonic", self.tectonic_path, timeout=900)
+            result = latex.compile_tex(str(doc), "tectonic", exe, timeout=900)
         if not result["ok"]:
             first = next((m["message"] for m in result["messages"] if m["kind"] == "error"), "unknown error")
             raise RuntimeError(f"LaTeX engine test compile failed: {first}")
+        self._dir.mkdir(parents=True, exist_ok=True)
         (self._dir / ".warmed").write_text(TECTONIC_VERSION)

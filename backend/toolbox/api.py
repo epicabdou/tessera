@@ -389,6 +389,10 @@ class Api:
     def suggest_pdf_path(self, source: str | None, hint: str = "document") -> str:
         return convert.suggest_pdf_path(source, hint)
 
+    def suggest_output_path(self, source: str | None, hint: str = "document", ext: str = "pdf") -> str:
+        """Like suggest_pdf_path, for any extension. ``source`` must be a local file, not a web address."""
+        return convert.suggest_output_path(source, hint, ext)
+
     def image_thumbnails(self, paths: list[str], size: int = 160) -> list[dict]:
         results = []
         for path in paths:

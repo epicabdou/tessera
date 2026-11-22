@@ -118,7 +118,7 @@ Renders a web page, an HTML file or a snippet of HTML and CSS into a PNG, JPG or
 - Widths under 600 px are rendered as on a phone.
 - Scroll bars are hidden in the picture.
 - **The whole page** is captured up to 16,000 pixels tall (before **Sharpness** is applied). A longer page is cut off at that point.
-- Suggested names: for a web page, a name taken from the address, such as `example.png`; for an HTML file, the file's name with the picture's extension, in the same folder; for HTML code, `snippet.png` in your Downloads folder.
+- Suggested names: for a web page, a name taken from the address in your Downloads folder, such as `example.com.png`; for an HTML file, the file's name with the picture's extension, in the same folder; for HTML code, `snippet.png` in your Downloads folder.
 - Pasted code that isn't a complete page is wrapped in one. Because it's rendered from a temporary folder, relative links to pictures or stylesheets won't find your files. Save the HTML as a file next to them and use **HTML file** instead.
 - Saved pictures contain no metadata.
 - If the page can't be reached, you'll see "The page couldn't be loaded. Check the address and your internet connection."

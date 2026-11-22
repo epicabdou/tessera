@@ -109,7 +109,7 @@ These points apply to Word to PDF, PowerPoint to PDF and Excel to PDF.
 
 - **You need Microsoft Office or LibreOffice.** Tessera checks for each Office app separately (Word, Excel, PowerPoint), so you can have one and not the others. It finds LibreOffice on your `PATH` or in `Program Files\LibreOffice`.
 - **Which one is used.** Microsoft Office is used when it's installed, because its output is closest to the original. Otherwise LibreOffice is used. If both are installed, you can switch in the list under the title.
-- **If neither is installed**, the tool shows a message and the convert button stays disabled. Tessera looks for these apps when it starts, so after installing one, close and reopen Tessera.
+- **If neither is installed**, the tool shows a message and the convert button stays disabled. After installing one, click **Check again** in that message; you don't need to restart Tessera.
 - **Your documents are safe.** Files are opened read-only, and macros are turned off before a file is opened. Office runs invisibly as its own copy, so documents you have open aren't touched, and Tessera only closes the copy it started. LibreOffice runs with a separate, temporary profile, so it works even while you have LibreOffice open.
 - **One at a time.** Files convert one after another. If you click the button again, files that already converted are skipped, and files that failed are tried again.
 - **Password-protected** Word and Excel files fail with an error instead of asking for the password.

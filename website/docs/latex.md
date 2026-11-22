@@ -62,6 +62,7 @@ Type `\` and a few letters to see matching commands, such as `\section`, `\textb
 | Keys | Action |
 |---|---|
 | <kbd>Ctrl</kbd>+<kbd>S</kbd> | Save (Save as for a new document) |
+| <kbd>Ctrl</kbd>+<kbd>Enter</kbd> | Compile |
 | <kbd>Ctrl</kbd>+<kbd>Space</kbd> | Show the completion list after a `\` |
 | <kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd> | Indent / unindent the line or selection |
 | <kbd>Ctrl</kbd>+<kbd>F</kbd> | Find and replace in the source |
@@ -85,7 +86,7 @@ Tessera finds engines that are on your PATH, MiKTeX in its standard folders (in 
 - "Installing the LaTeX engine…"
 - "Downloading the standard LaTeX packages (first run only, a few minutes)…"
 
-If setup fails, for example because you're offline, the banner says "LaTeX setup failed" with the reason and a **Try again** button. The status panel in the top bar offers **Retry LaTeX setup** too, and Tessera tries again the next time it starts. If you already have MiKTeX or TeX Live installed, nothing is downloaded.
+If setup fails, for example because you're offline, the banner says "LaTeX setup failed" with the reason and a **Try again** button. The status panel in the top bar offers **Retry LaTeX setup** too, and Tessera tries again the next time it starts. If you already have MiKTeX or TeX Live installed, nothing is downloaded. If Tectonic is already on your `PATH`, Tessera uses that copy and only runs the one-time package download. If no engine is installed and setup hasn't started, the banner says so and offers **Install now**.
 
 Tectonic downloads any other package the first time a document uses it, so a document with new packages needs an internet connection the first time you compile it. See [Privacy](/docs/privacy).
 

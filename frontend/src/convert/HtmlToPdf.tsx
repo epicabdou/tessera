@@ -7,7 +7,7 @@ import { CONVERT_EXTS, extOf, useToolRequest, useWorkspace } from '../lib/worksp
 import { ResultCard } from '../pdf/components'
 import { useSaveFlow } from '../pdf/useSaveFlow'
 import { PrintOptions } from './shared'
-import { basename, DEFAULT_PRINT, useFileDrop } from './util'
+import { basename, DEFAULT_PRINT, hostHint, useFileDrop } from './util'
 
 type Source = 'url' | 'file' | 'code'
 
@@ -43,15 +43,6 @@ export function HtmlToPdf() {
       if (path) chooseFile(path)
     } catch (err) {
       setNotice(toError(err))
-    }
-  }
-
-  function hostHint(text: string) {
-    try {
-      const u = new URL(/^[a-z]+:\/\//i.test(text) ? text : `https://${text}`)
-      return u.hostname + (u.pathname.length > 1 ? u.pathname.replace(/\.[a-z]+$/i, '').replace(/[/]+/g, '-') : '')
-    } catch {
-      return 'web-page'
     }
   }
 

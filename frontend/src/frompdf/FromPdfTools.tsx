@@ -6,7 +6,7 @@ import { call, toError, type ConversionEngines, type PdfInfo } from '../lib/brid
 import { cls } from '../lib/cls'
 import { dirname } from '../lib/format'
 import { useJob } from '../lib/useJob'
-import { useToolRequest, useWorkspace, type ToolId } from '../lib/workspace'
+import { isPdf, useToolRequest, useWorkspace, type ToolId } from '../lib/workspace'
 import { DocGate, ResultCard } from '../pdf/components'
 import { usePdfDoc } from '../pdf/context'
 import { useSaveFlow } from '../pdf/useSaveFlow'
@@ -31,7 +31,10 @@ function Footer({ flow, job, label, onRun, disabled }: { flow: ReturnType<typeof
   return (
     <>
       <ErrorNotice error={flow.error} />
-      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => openInTool('pdf-pages', f.path)} />}
+      {flow.saved && (
+        // PDF to JPG can produce a single image: keep editing that in the Photo editor, not the PDF tools.
+        <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => openInTool(isPdf(f.path) ? 'pdf-pages' : 'photo-editor', f.path)} />
+      )}
       <div className="action-bar">
         <JobProgressBar busy={job.busy} progress={job.progress} />
         <button type="button" className="btn btn-primary" disabled={flow.busy || job.busy || disabled} onClick={onRun}>

@@ -3,6 +3,7 @@ import { ErrorNotice } from '../components/ErrorNotice'
 import { RotateCcwIcon, RotateCwIcon } from '../components/icons'
 import { call, toError, type ImageInfo, type ImageView, type SavedImage } from '../lib/bridge'
 import { cls } from '../lib/cls'
+import { hostHint } from '../convert/util'
 import { useToolRequest } from '../lib/workspace'
 import { useJob } from '../lib/useJob'
 import { ResultCard } from '../pdf/components'
@@ -279,7 +280,9 @@ export function HtmlToImage() {
   async function capture() {
     setShot(null)
     const res = await flow.saveTo(
-      async () => (await call('suggest_pdf_path', kind === 'code' ? null : value, kind === 'code' ? 'snippet' : 'page')).replace(/\.pdf$/i, `.${ext}`),
+      // Next to an .html file; a web address or pasted code goes to Downloads, named after the page.
+      // The extension is checked for clashes as the image's, not as .pdf.
+      () => call('suggest_output_path', kind === 'file' ? value : null, kind === 'url' ? hostHint(value) : kind === 'code' ? 'snippet' : 'page', ext),
       (out) =>
         call('html_to_image', kind, value, out, {
           width,

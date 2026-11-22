@@ -160,6 +160,19 @@ def test_suggest_pdf_path(tmp_path):
     assert convert.suggest_pdf_path(None, "exa/mple:site").endswith("exa_mple_site.pdf")
 
 
+def test_suggest_output_path_uses_the_real_extension(tmp_path, monkeypatch):
+    monkeypatch.setattr(convert, "known_folder", lambda name: str(tmp_path))
+    # A web address is never a folder: the image goes to Downloads, named after the page.
+    assert convert.suggest_output_path(None, "example.com-docs", "png") == str(tmp_path / "example.com-docs.png")
+    # The clash check looks for the image's own name, not a .pdf.
+    (tmp_path / "example.com-docs.png").write_bytes(b"x")
+    (tmp_path / "page.pdf").write_bytes(b"x")
+    assert convert.suggest_output_path(None, "example.com-docs", "png").endswith("example.com-docs (2).png")
+    assert convert.suggest_output_path(None, "page", ".jpg") == str(tmp_path / "page.jpg")
+    src = tmp_path / "card.html"
+    assert convert.suggest_output_path(str(src), "", "webp") == str(tmp_path / "card.webp")
+
+
 # --- office -----------------------------------------------------------------------
 
 

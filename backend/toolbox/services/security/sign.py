@@ -23,12 +23,15 @@ from ..editing.geometry import visual_rect_to_user
 from ..filesystem import replace_with_retry
 from ..pdf.common import unique_path
 
+# Protects the certificate's private key. The Sign PDF form asks for the same minimum.
+MIN_CERT_PASSWORD = 6
+
 
 def create_certificate(output: str, password: str, name: str, email: str = "", organization: str = "", country: str = "", years: int = 3) -> dict:
     """A self-signed signing certificate (.pfx). Fine for your own approvals; recipients
     will see it as "not trusted" unless they trust it explicitly."""
-    if len(password) < 4:
-        raise ValueError("Choose a password of at least 4 characters for the certificate")
+    if len(password) < MIN_CERT_PASSWORD:
+        raise ValueError(f"Choose a password of at least {MIN_CERT_PASSWORD} characters for the certificate")
     if not name.strip():
         raise ValueError("Enter the signer's name")
     attrs = [x509.NameAttribute(NameOID.COMMON_NAME, name.strip())]
