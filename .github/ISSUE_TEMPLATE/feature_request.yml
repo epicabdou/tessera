@@ -1,0 +1,58 @@
+name: Feature request
+description: Suggest a new tool, or an improvement to an existing one.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea. Please search the [existing issues](https://github.com/epicabdou/tessera/issues?q=is%3Aissue) first: if someone already asked for it, add a thumbs-up reaction and your use case there.
+
+        Tessera processes files on your own PC and never uploads them, so features that need an online service are unlikely to be accepted.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - PDF tools
+        - Conversion to or from PDF
+        - LaTeX editor
+        - Image tools
+        - Explorer, Preview or History
+        - Installer or updates
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the task and why the current tools don't cover it. Start with the problem, not the solution.
+      placeholder: I scan receipts every month and have to ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: What would you like Tessera to do?
+      description: How you imagine it working. Mockups or examples from other apps are welcome.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you've considered
+      description: Workarounds you use today, or other ways it could be done.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contributing
+      options:
+        - label: I'd like to work on this myself (see CONTRIBUTING.md).
+          required: false

@@ -10,10 +10,14 @@ Attributes and methods starting with ``_`` are not exposed to JavaScript.
 from __future__ import annotations
 
 import atexit
+import functools
+import inspect
+import logging
 import os
 import tempfile
 import threading
-from collections.abc import Iterator
+import time
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
@@ -45,9 +49,79 @@ from .services.pdf import common as pdf_common
 from .services.pdf import numbering as pdf_numbering
 from .services.pdf import ops as pdf_ops
 from .services.pdf import render as pdf_render
+from .services.history import History
 from .services.settings import Settings
 
+log = logging.getLogger(__name__)
+
 PDF_TYPES = ("PDF files (*.pdf)", "All files (*.*)")
+
+
+# --- activity history ------------------------------------------------------------------
+
+Label = str | Callable[[dict[str, Any]], str]
+
+
+def _records(label: Label) -> Callable:
+    """Record each call of a tool method in the activity history: its input and output files,
+    timing, and the error if it failed. ``label`` is the tool's name in the UI, or a function
+    of the call's arguments for methods that serve several tools."""
+
+    def wrap(func: Callable) -> Callable:
+        signature = inspect.signature(func)
+
+        @functools.wraps(func)
+        def recorded(self: Api, *args: Any, **kwargs: Any) -> Any:
+            try:
+                bound = signature.bind(self, *args, **kwargs)
+                bound.apply_defaults()
+                values = {k: v for k, v in bound.arguments.items() if k != "self"}
+            except TypeError:
+                values = {}  # wrong arguments: let the call itself raise
+            started, clock = time.time(), time.perf_counter()
+            try:
+                result = func(self, *args, **kwargs)
+            except Exception as exc:
+                self._record(func.__name__, label, values, started, clock, None, exc)
+                raise
+            self._record(func.__name__, label, values, started, clock, result, None)
+            return result
+
+        # pywebview names the JS function's parameters with getfullargspec, which doesn't
+        # follow functools.wraps; an explicit signature keeps them.
+        recorded.__signature__ = signature  # type: ignore[attr-defined]
+        return recorded
+
+    return wrap
+
+
+def _history_inputs(values: dict[str, Any]) -> list[str]:
+    """Source files of a call, from the argument names the tool methods use."""
+    found: list[str] = []
+    if isinstance(values.get("path"), str):
+        found.append(values["path"])
+    found += [p for p in values.get("paths") or [] if isinstance(p, str)]
+    found += [i["path"] for i in values.get("items") or [] if isinstance(i, dict) and isinstance(i.get("path"), str)]
+    sources = values.get("sources")
+    if isinstance(sources, dict):
+        found += [p for p in sources.values() if isinstance(p, str)]
+    if values.get("kind") in ("url", "file") and isinstance(values.get("value"), str):
+        found.append(values["value"])  # HTML to PDF / image: a web address or an .html file
+    return list(dict.fromkeys(found))
+
+
+def _history_outputs(result: Any) -> list[dict]:
+    """Files a call wrote: one file ({path, ...}), several ({files: [...]}) or a list of them."""
+    if isinstance(result, dict):
+        items = result["files"] if isinstance(result.get("files"), list) else [result]
+    elif isinstance(result, list):
+        items = result
+    else:
+        items = []
+    return [{"path": i["path"], "size": i.get("size")} for i in items if isinstance(i, dict) and isinstance(i.get("path"), str)]
+
+
+_OFFICE_LABELS = {"word": "Word to PDF", "excel": "Excel to PDF", "powerpoint": "PowerPoint to PDF"}
 
 
 def _pages(path: str, spec: str | None) -> list[int] | None:
@@ -113,7 +187,7 @@ def _remove_quietly(path: Path) -> bool:
 
 
 class Api:
-    def __init__(self, settings: Settings, components: Any = None) -> None:
+    def __init__(self, settings: Settings, components: Any = None, history: History | None = None) -> None:
         from .paths import user_data_dir
         from .services.components import Components
 
@@ -122,6 +196,23 @@ class Api:
         self._components = components or Components(user_data_dir())
         self._previews = _PreviewFiles()
         self._models = img_ai.Models(user_data_dir() / "models")
+        # Opened on first use, so nothing is created until a tool runs or the history is viewed.
+        self._history = history or History(user_data_dir() / "history.db")
+        atexit.register(self._history.close)  # a clean close folds the WAL back into the database
+
+    def _record(
+        self, action: str, label: Label, values: dict[str, Any], started: float, clock: float, result: Any, exc: BaseException | None
+    ) -> None:
+        """Called by @_records. Never raises: a history problem must not fail the tool."""
+        try:
+            if not self._settings.preference("history_enabled"):
+                return
+            name = label(values) if callable(label) else label
+            error = None if exc is None else (str(exc) or type(exc).__name__)[:1000]
+            duration = round((time.perf_counter() - clock) * 1000)
+            self._history.add(action, name, started, duration, _history_inputs(values), _history_outputs(result), error)
+        except Exception:  # noqa: BLE001
+            log.exception("Couldn't record %s in the history", action)
 
     def _bind_window(self, window: webview.Window) -> None:
         self._window = window
@@ -150,6 +241,18 @@ class Api:
     def set_preference(self, key: str, value: Any) -> None:
         self._settings.set_preference(key, value)
 
+    # --- activity history ------------------------------------------------------
+
+    def history_list(self, query: str = "", limit: int = 50, before_id: int | None = None) -> dict:
+        """Newest first; pass the last entry's id as ``before_id`` for the next page."""
+        return {**self._history.list(query, limit, before_id), "enabled": bool(self._settings.preference("history_enabled"))}
+
+    def history_delete(self, ids: list[int]) -> None:
+        self._history.delete(ids)
+
+    def history_clear(self) -> None:
+        self._history.clear()
+
     def pin_folder(self, path: str, index: int | None = None) -> list[dict]:
         """Pin a folder; if it's already pinned and ``index`` is given, move it there."""
         return self._settings.pin(path, index)
@@ -170,6 +273,17 @@ class Api:
 
     def open_path(self, path: str) -> None:
         filesystem.open_path(path)
+
+    def open_link(self, name: str) -> None:
+        """Open one of the project's pages (website, source, license…) in the default browser.
+        Only names from LINKS: the page can't make the app open arbitrary addresses."""
+        import webbrowser
+
+        from . import LINKS
+
+        if name not in LINKS:
+            raise ValueError(f"Unknown link: {name!r}")
+        webbrowser.open(LINKS[name])
 
     def reveal_path(self, path: str) -> None:
         filesystem.reveal_path(path)
@@ -236,21 +350,27 @@ class Api:
     def pdf_suggest_output(self, path: str, suffix: str) -> str:
         return pdf_common.suggest_output(path, suffix)
 
+    @_records("Merge PDF")
     def pdf_merge(self, items: list[dict], output: str, bookmarks: bool = False) -> dict:
         return pdf_ops.merge(items, output, bookmarks)
 
+    @_records("Split PDF")
     def pdf_split(self, path: str, output_dir: str, mode: str, value: str) -> dict:
         return pdf_ops.split(path, output_dir, mode, value)
 
+    @_records("Organize PDF")
     def pdf_organize(self, output: str, sources: dict[str, str], pages: list[dict]) -> dict:
         return pdf_ops.organize(output, sources, pages)
 
+    @_records("Rotate PDF")
     def pdf_rotate(self, path: str, output: str, rotations: list[int]) -> dict:
         return pdf_ops.rotate(path, output, rotations)
 
+    @_records("Crop PDF")
     def pdf_crop(self, path: str, output: str, margins: dict, pages: list[int] | None = None) -> dict:
         return pdf_ops.crop(path, output, margins, pages)
 
+    @_records("Page numbers")
     def pdf_number_pages(self, path: str, output: str, options: dict) -> dict:
         return pdf_numbering.add_page_numbers(path, output, options)
 
@@ -260,6 +380,7 @@ class Api:
         """Which of Microsoft Office / LibreOffice can convert Word, Excel and PowerPoint files."""
         return convert_office.engines()
 
+    @_records(lambda a: _OFFICE_LABELS.get(a.get("kind"), "Office to PDF"))
     def convert_office(
         self, kind: str, path: str, output_dir: str | None = None, engine: str = "auto", options: dict | None = None
     ) -> dict:
@@ -277,9 +398,11 @@ class Api:
                 results.append({"path": path, "name": Path(path).name, "error": str(exc)})
         return results
 
+    @_records("JPG to PDF")
     def images_to_pdf(self, items: list[dict], output: str, options: dict) -> dict:
         return convert_images.images_to_pdf(items, output, options)
 
+    @_records("JPG to PDF")
     def images_to_pdfs(self, items: list[dict], output_dir: str | None, options: dict) -> list[dict]:
         return convert_images.images_to_pdfs(items, output_dir, options)
 
@@ -287,6 +410,7 @@ class Api:
         """Rendered Markdown, for the live preview."""
         return convert_markdown.render_markdown(text, base_dir, theme, title)
 
+    @_records("Markdown to PDF")
     def markdown_to_pdf(self, text: str, base_dir: str | None, theme: str, title: str, output: str, options: dict) -> dict:
         document = convert_markdown.render_markdown(text, base_dir, theme, title)
         return self._print_html_document(document, output, options, title)
@@ -309,26 +433,32 @@ class Api:
     def image_suggest(self, path: str, suffix: str, fmt: str = "keep") -> str:
         return str(img_io.output_path(path, None, suffix, img_io.resolve_format(path, fmt)))
 
+    @_records("Compress Image")
     def image_compress(self, paths: list[str], folder: str | None, options: dict, job_id: str = "") -> list[dict]:
         return img_basic.compress(paths, folder, options, progress.reporter(job_id))
 
     def image_compress_estimate(self, path: str, options: dict) -> dict:
         return img_basic.estimate(path, options)
 
+    @_records("Resize Image")
     def image_resize(self, paths: list[str], folder: str | None, options: dict, job_id: str = "") -> list[dict]:
         return img_basic.resize(paths, folder, options, progress.reporter(job_id))
 
+    @_records(lambda a: "Convert to JPG" if (a.get("options") or {}).get("format") == "jpg" else "Convert from JPG")
     def image_convert(self, paths: list[str], folder: str | None, options: dict, job_id: str = "") -> list[dict]:
         return img_basic.convert(paths, folder, options, progress.reporter(job_id))
 
     # --- Images: framing, layout & generation -----------------------------------------
 
+    @_records("Crop Image")
     def image_crop(self, path: str, output: str, rect: dict, options: dict) -> dict:
         return img_basic.crop(path, output, rect, options)
 
+    @_records("Rotate Image")
     def image_rotate(self, items: list[dict], folder: str | None, options: dict, job_id: str = "") -> list[dict]:
         return img_basic.rotate(items, folder, options, progress.reporter(job_id))
 
+    @_records("HTML to Image")
     def html_to_image(self, kind: str, value: str, output: str, options: dict) -> dict:
         """kind: "url", "file" (a local .html file) or "code" (HTML source)."""
         if kind == "url":
@@ -352,6 +482,7 @@ class Api:
     def ai_models(self) -> dict:
         return self._models.status()
 
+    @_records("Upscale Image")
     def ai_upscale(self, path: str, output: str, scale: int, options: dict, job_id: str = "") -> dict:
         return img_ai.upscale(self._models, path, output, int(scale), options, progress.reporter(job_id))
 
@@ -361,6 +492,7 @@ class Api:
     def ai_remove_bg_preview(self, path: str, options: dict, job_id: str = "") -> dict:
         return img_ai.remove_background_preview(self._models, path, options, progress=progress.reporter(job_id))
 
+    @_records("Remove background")
     def ai_remove_bg(self, path: str, output: str, options: dict, job_id: str = "") -> dict:
         return img_ai.remove_background(self._models, path, output, options, progress.reporter(job_id))
 
@@ -370,6 +502,7 @@ class Api:
     def faces_preview(self, path: str, faces: list[dict], options: dict) -> dict:
         return img_faces.preview(path, faces, options)
 
+    @_records("Blur face")
     def faces_blur(self, path: str, output: str, faces: list[dict], options: dict) -> dict:
         return img_faces.blur_faces(path, output, faces, options)
 
@@ -378,15 +511,18 @@ class Api:
     def photo_preview(self, path: str, edits: dict, max_side: int = 1400) -> dict:
         return img_editor.editor_preview(path, edits, int(max_side))
 
+    @_records("Photo editor")
     def photo_save(self, path: str, output: str, edits: dict, options: dict) -> dict:
         return img_editor.editor_save(path, output, edits, options)
 
     def image_watermark_preview(self, path: str, options: dict, max_side: int = 1400) -> dict:
         return img_editor.watermark_preview(path, options, int(max_side))
 
+    @_records("Watermark Image")
     def image_watermark(self, paths: list[str], folder: str | None, options: dict, job_id: str = "") -> list[dict]:
         return img_editor.watermark(paths, folder, options, progress.reporter(job_id))
 
+    @_records("HTML to PDF")
     def html_to_pdf(self, kind: str, value: str, output: str, options: dict) -> dict:
         """kind: "url" (a web address), "file" (a local .html file) or "code" (HTML source)."""
         if kind == "url":
@@ -438,20 +574,25 @@ class Api:
     def frompdf_suggest(self, path: str, ext: str) -> str:
         return frompdf.suggest_path(path, ext)
 
+    @_records("PDF to Word")
     def pdf_to_word(self, path: str, output: str, engine: str = "auto", fmt: str = "docx", job_id: str = "") -> dict:
         return fp_convert.to_word(path, output, engine, fmt, progress.reporter(job_id))
 
+    @_records("PDF to PowerPoint")
     def pdf_to_powerpoint(self, path: str, output: str, dpi: int = 150, notes: bool = True, job_id: str = "") -> dict:
         return fp_convert.to_powerpoint(path, output, int(dpi), bool(notes), progress.reporter(job_id))
 
+    @_records("PDF to Excel")
     def pdf_to_excel(self, path: str, output: str, pages: str = "", detection: str = "auto", job_id: str = "") -> dict:
         return fp_convert.to_excel(path, output, _pages(path, pages), detection, progress.reporter(job_id))
 
+    @_records(lambda a: f"PDF to {str(a.get('fmt') or 'jpg').upper()}")
     def pdf_to_images(
         self, path: str, output_dir: str | None, pages: str = "", fmt: str = "jpg", dpi: int = 150, quality: int = 90, mode: str = "pages", job_id: str = ""
     ) -> dict:
         return fp_convert.to_images(path, output_dir, _pages(path, pages), fmt, int(dpi), int(quality), mode, progress.reporter(job_id))
 
+    @_records("PDF to Markdown")
     def pdf_to_markdown(self, path: str, output: str, pages: str = "", page_breaks: bool = False, job_id: str = "") -> dict:
         return fp_convert.to_markdown(path, output, _pages(path, pages), bool(page_breaks), progress.reporter(job_id))
 
@@ -464,12 +605,14 @@ class Api:
     def pdf_text_lines(self, path: str, page: int) -> list[dict]:
         return ed_edit.text_lines(path, int(page))
 
+    @_records("Edit PDF")
     def pdf_apply_edits(self, path: str, output: str, objects: list[dict]) -> dict:
         return ed_edit.apply_edits(path, output, objects)
 
     def ocr_engines(self) -> dict:
         return ed_ocr.engines()
 
+    @_records("OCR PDF")
     def ocr_pdf(
         self, path: str, output: str, engine: str = "auto", language: str = "", dpi: int = 300, skip_text: bool = True, pages: str = "", job_id: str = ""
     ) -> dict:
@@ -478,12 +621,15 @@ class Api:
     def form_fields(self, path: str) -> list[dict]:
         return ed_forms.list_fields(path)
 
+    @_records("Fill PDF form")
     def form_fill(self, path: str, output: str, values: dict, flatten: bool = False) -> dict:
         return ed_forms.fill(path, output, values, bool(flatten))
 
+    @_records("Add PDF form fields")
     def form_add_fields(self, path: str, output: str, specs: list[dict]) -> dict:
         return ed_forms.add_fields(path, output, specs)
 
+    @_records("Watermark PDF")
     def pdf_watermark(self, path: str, output: str, options: dict) -> dict:
         return ed_watermark.watermark(path, output, options)
 
@@ -508,21 +654,25 @@ class Api:
     def pdf_security_info(self, path: str) -> dict:
         return sec_protect.security_info(path)
 
+    @_records("Protect PDF")
     def pdf_protect(self, path: str, output: str, user_password: str, owner_password: str, permissions: dict, algorithm: str = "AES-256") -> dict:
         return sec_protect.protect(path, output, user_password, owner_password, permissions, algorithm)
 
+    @_records("Unlock PDF")
     def pdf_unlock(self, path: str, output: str, password: str) -> dict:
         return sec_protect.unlock(path, output, password)
 
     def cert_suggest_path(self, name: str) -> str:
         return sec_sign.suggest_certificate_path(name)
 
+    @_records("Create certificate")
     def cert_create(self, output: str, password: str, name: str, email: str = "", organization: str = "", country: str = "") -> dict:
         return sec_sign.create_certificate(output, password, name, email, organization, country)
 
     def cert_info(self, path: str, password: str) -> dict:
         return sec_sign.certificate_info(path, password)
 
+    @_records("Sign PDF")
     def pdf_sign(
         self, path: str, output: str, certificate: str, password: str, reason: str = "", location: str = "", contact: str = "", visible: dict | None = None
     ) -> dict:
@@ -531,12 +681,14 @@ class Api:
     def pdf_verify_signatures(self, path: str) -> list[dict]:
         return sec_sign.verify(path)
 
+    @_records("Compress PDF")
     def pdf_compress(self, path: str, output: str, level: str = "medium", strip_metadata: bool = False, job_id: str = "") -> dict:
         return sec_optimize.compress(path, output, level, bool(strip_metadata), progress.reporter(job_id))
 
     def pdf_analyze(self, path: str) -> dict:
         return sec_optimize.analyze(path)
 
+    @_records("Repair PDF")
     def pdf_repair(self, path: str, output: str) -> dict:
         return sec_optimize.repair(path, output)
 
@@ -552,9 +704,11 @@ class Api:
             info = pdf_common.pdf_info(target)
         return {**info, "sheets": result["sheets"], "source_pages": result["source_pages"]}
 
+    @_records("Print")
     def print_pdf(self, path: str, printer: str, options: dict, job_id: str = "") -> dict:
         return pr_printer.print_pdf(path, printer, options, progress.reporter(job_id))
 
+    @_records("Print to PDF")
     def print_save_pdf(self, path: str, output: str, options: dict) -> dict:
         return pr_impose.impose(path, output, options)
 

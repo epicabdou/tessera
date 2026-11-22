@@ -558,6 +558,261 @@ body.is-resizing * {
   font-size: 12.5px;
 }
 
+.about-legal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.about-legal p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.about-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.about-links button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.about-links button:hover {
+  text-decoration: underline;
+}
+
+/* ================= history ================= */
+
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(440px, calc(100vw - 40px));
+  max-height: min(640px, calc(100vh - 110px));
+}
+
+.history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.history-head strong {
+  font: 700 16px var(--display);
+}
+
+.history-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.history-search svg {
+  position: absolute;
+  left: 11px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.history-search .text-input {
+  width: 100%;
+  padding-left: 32px;
+}
+
+.history-note,
+.history-empty {
+  margin: 0;
+}
+
+.history-empty {
+  padding: 18px 4px;
+  text-align: center;
+}
+
+.history-list {
+  flex: 1;
+  min-height: 0;
+  margin: 0 -8px;
+  padding: 0 8px;
+  overflow-y: auto;
+}
+
+.history-day h3 {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0;
+  padding: 8px 0 6px;
+  background: var(--glass-strong);
+  color: var(--text-muted);
+  font: 600 11px/1.4 var(--sans);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.history-day ul,
+.history-files {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.history-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+.history-entry:hover {
+  background: var(--bg-hover);
+}
+
+.history-entry-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.history-entry-head strong {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+
+.history-dot.is-error {
+  background: var(--danger);
+}
+
+/* Small, flat buttons inside the panel. It sits in the top bar, whose bigger `.topbar .icon-btn`
+   comes later in this file, hence the extra class. */
+.popover.history .icon-btn {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+}
+
+.popover.history .icon-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.history-remove {
+  margin-left: auto;
+  opacity: 0;
+}
+
+.history-entry:hover .history-remove,
+.history-remove:focus-visible {
+  opacity: 1;
+}
+
+.history-error {
+  margin: 0 0 0 15px;
+  color: var(--danger);
+  overflow-wrap: anywhere;
+}
+
+.history-files {
+  display: flex;
+  flex-direction: column;
+  margin-left: 15px;
+}
+
+.history-files li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.history-file {
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+button.history-file {
+  cursor: pointer;
+}
+
+button.history-file:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.history-files .is-missing .history-file {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.history-expand {
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.history-from {
+  margin: 0 0 0 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-more {
+  display: block;
+  margin: 6px auto 2px;
+}
+
+.history-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.history-foot span {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-foot .btn {
+  flex: none;
+}
+
 /* ================= tool strip ================= */
 
 .toolstrip {
@@ -1484,6 +1739,17 @@ textarea[readonly] {
 .btn-ghost:hover:not(:disabled) {
   background: var(--bg-hover);
   color: var(--text);
+}
+
+/* Confirms something that can't be undone. */
+.btn-danger {
+  border: 0;
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-danger:hover:not(:disabled) {
+  filter: brightness(1.08);
 }
 
 .btn-sm {

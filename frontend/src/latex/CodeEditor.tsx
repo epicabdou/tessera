@@ -2,7 +2,7 @@ import { autocompletion, type CompletionContext } from '@codemirror/autocomplete
 import { indentWithTab } from '@codemirror/commands'
 import { HighlightStyle, StreamLanguage, syntaxHighlighting } from '@codemirror/language'
 import { stex } from '@codemirror/legacy-modes/mode/stex'
-import { EditorState } from '@codemirror/state'
+import { EditorState, Prec } from '@codemirror/state'
 import { EditorView, keymap } from '@codemirror/view'
 import { tags as t } from '@lezer/highlight'
 import { basicSetup } from 'codemirror'
@@ -96,7 +96,9 @@ export const CodeEditor = forwardRef<CodeEditorHandle, Props>(function CodeEdito
           autocompletion({ override: [latexCompletions] }),
           EditorView.lineWrapping,
           theme,
-          keymap.of([
+          // Highest precedence: basicSetup's default keymap binds Mod-Enter to "insert blank line",
+          // and at equal precedence the first keymap listed wins.
+          Prec.highest(keymap.of([
             indentWithTab,
             {
               key: 'Mod-s',
@@ -114,7 +116,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, Props>(function CodeEdito
                 return true
               },
             },
-          ]),
+          ])),
           EditorView.updateListener.of((u) => {
             if (u.docChanged) handlers.current.onChange(u.state.doc.toString())
           }),

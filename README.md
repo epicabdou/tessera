@@ -4,7 +4,13 @@
 
 **PDF and image tools that run on your own computer.**
 
-Merge, split, convert, sign, protect, OCR and compress PDFs; resize, convert, crop and enhance images; write LaTeX. Your files are processed on your PC, never uploaded.
+Merge, split, convert, sign, protect, OCR and compress PDFs; resize, convert, crop and enhance images; write LaTeX. Your files are processed on your PC, never uploaded. A free, open-source alternative to online tools like iLovePDF and iLoveIMG.
+
+**[Download for Windows](https://github.com/epicabdou/tessera/releases/latest/download/Tessera-x64.msi)** · [Website](https://epicabdou.github.io/tessera/) · [Documentation](https://epicabdou.github.io/tessera/docs/) · [Support](https://epicabdou.github.io/tessera/support) · [Releases](https://github.com/epicabdou/tessera/releases)
+
+![Tessera merging three PDFs, with the Explorer on the left and a live preview on the right](website/public/screenshots/merge.webp)
+
+## For developers
 
 Under the hood it's a desktop app with a **React** UI and **Python** business logic, shipped as a native Windows executable.
 
@@ -26,11 +32,11 @@ Under the hood it's a desktop app with a **React** UI and **Python** business lo
 - **[pywebview](https://pywebview.flowrl.com/)** opens a native window using the WebView2 runtime built into Windows 10/11. Python methods are callable from JavaScript directly, so there's no REST API and no open port for the bridge.
 - **Vite + React + TypeScript** for the UI, with hot reload during development.
 - **PyInstaller** bundles Python, the backend and the built UI into `Tessera.exe`.
-- **pypdf** (BSD) edits PDFs and **pypdfium2** (PDFium, Apache/BSD) renders page previews. Both have permissive licences, so you can ship the app however you like. PyMuPDF was avoided because it is AGPL.
+- **pypdf** (BSD) edits PDFs and **pypdfium2** (PDFium, Apache/BSD) renders page previews. Both have permissive licences that are compatible with Tessera's GPL. PyMuPDF was avoided because it is AGPL.
 - **pywin32** drives Microsoft Office for document conversion. **markdown-it-py** and **Pygments** render Markdown. All three are permissively licensed.
 - **pdfplumber**, **python-docx**, **python-pptx** and **openpyxl** (all MIT) convert PDFs to Office files. **ReportLab** (BSD) draws text, images and shapes onto pages. **pyHanko** (MIT) and **cryptography** (Apache/BSD) make and check digital signatures. OCR uses **Tesseract** when it's installed, otherwise the OCR engine built into Windows (through the **winrt** packages).
 - The LaTeX editor uses **CodeMirror** (MIT) and compiles with **Tectonic** (MIT), which the app downloads on first launch (see [Runtime notes](#runtime-notes)).
-- The image tools use **Pillow** (HPND) and **numpy** (BSD), **pillow-heif** (BSD; it bundles libheif and its codecs, LGPL, as separate DLLs) for iPhone HEIC photos, and **ONNX Runtime with DirectML** (MIT) to run the AI models on the graphics card, or on the CPU when there's no suitable GPU. The models are downloaded the first time an AI tool needs them (see [Runtime notes](#runtime-notes)); face detection uses the detector built into Windows.
+- The image tools use **Pillow** (HPND) and **numpy** (BSD), **pillow-heif** for iPhone HEIC photos (its wheel bundles libheif and libde265, LGPL-3.0, and x265, GPL-2.0-or-later, as separate DLLs), and **ONNX Runtime with DirectML** (MIT) to run the AI models on the graphics card, or on the CPU when there's no suitable GPU. The models are downloaded the first time an AI tool needs them (see [Runtime notes](#runtime-notes)); face detection uses the detector built into Windows.
 
 ## Layout
 
@@ -203,6 +209,7 @@ The image tools read JPG, PNG, WebP, HEIC/HEIF (iPhone), AVIF, GIF, BMP, TIFF an
 
 - Python 3.11+
 - Node.js 20+
+- .NET SDK 6+ (only to build the `.msi` installer)
 
 ## Setup
 
@@ -240,7 +247,21 @@ This produces `dist\Tessera\Tessera.exe`, a folder build that starts fastest. Zi
 
 This produces a single `dist\Tessera.exe`. It's easier to hand around, but it starts more slowly because it unpacks itself to a temporary folder on every launch.
 
-To set an app icon, put an `.ico` file at `assets\icon.ico` before building.
+### Windows installer (.msi)
+
+```powershell
+.venv\Scripts\python scripts\build.py --msi
+```
+
+This builds the folder version, then packs it into `dist\Tessera-<version>-x64.msi` (about 75 MB) and runs Windows Installer's consistency checks on it. Add `--skip-app` to repack the existing `dist\Tessera` without rebuilding it.
+
+- **Install:** double-click the MSI. It installs for the current user in `%LocalAppData%\Programs\Tessera`, with no admin prompt, adds a Start menu shortcut, and offers to launch Tessera at the end. To install for everyone on the PC in Program Files, run it elevated: `msiexec /i Tessera-<version>-x64.msi ALLUSERS=1`.
+- **Upgrade:** bump `__version__` in `backend/toolbox/__init__.py` and build again. A newer MSI replaces the installed version; an older one refuses to install over a newer one. Never change the `UpgradeCode` in `installer/Tessera.wxs`.
+- **Uninstall:** Settings → Apps, or `msiexec /x Tessera-<version>-x64.msi`. Your data in `%LOCALAPPDATA%\Tessera\` is kept.
+- **Tooling:** the [WiX Toolset](https://wixtoolset.org/) 5.0.2, pinned in `dotnet-tools.json` and restored automatically (it needs the .NET SDK 6 or later). WiX 6 and later require accepting the Open Source Maintenance Fee EULA, which is why the project stays on 5.
+- **Sources:** `installer\Tessera.wxs` (package, files, shortcut) and `installer\TesseraUI.wxs` (dialogs: Welcome, Ready, Finish; no licence page). The dialog artwork in `assets\installer\` comes from `scripts\make_brand.py`.
+
+The app icon is `assets\icon.ico`, also generated by `scripts\make_brand.py`.
 
 ## Test
 
@@ -347,15 +368,22 @@ frontend/
 scripts/
   dev.py                   Vite + window, one command
   build.py                 frontend build + PyInstaller
-  make_brand.py            regenerates the logo (favicon.svg) and the Windows icon (assets/icon.ico)
+  make_brand.py            regenerates the logo (favicon.svg), the Windows icon and the installer artwork
+  screenshots.py           real screenshots for the website (demo files, local bridge, headless Edge)
 assets/
   icon.ico                 the app icon, 16–256 px
+  installer/               MSI dialog artwork (dialog.bmp, banner.bmp)
+installer/
+  Tessera.wxs              the MSI: files, Start menu shortcut, upgrades
+  TesseraUI.wxs            its dialogs
+website/                   the website and user docs (VitePress): npm run dev / npm run build
+.github/workflows/         CI, MSI releases on v* tags, website deploy to GitHub Pages
 ```
 
 ## Adding a feature
 
 1. Write the logic in `backend/toolbox/services/` and add tests.
-2. Expose it with a public method on `Api` in `backend/toolbox/api.py`. Return JSON-serialisable values. A raised exception rejects the JS promise with its message.
+2. Expose it with a public method on `Api` in `backend/toolbox/api.py`. Return JSON-serialisable values. A raised exception rejects the JS promise with its message. If it writes files, decorate it with `@_records("<tool name>")` so its runs appear in History; name its source argument `path`, `paths` or `items` and return `{path, ...}`, `{files: [...]}` or a list of those, and the inputs and outputs are picked up automatically.
 3. Add the method's signature to `PyApi` in `frontend/src/lib/bridge.ts`.
 4. Call it from React with `await call('your_method', arg1, arg2)`.
 5. For a new screen, add a component and register it under a category in `frontend/src/tools/registry.tsx`, with an icon and a one-line `hint` (shown in Find a tool). To add a category, add its id to `CategoryId` in `src/lib/workspace.ts`, then add an entry to `CATEGORIES` with its `short` tab name and icon.
@@ -381,11 +409,13 @@ Calls from JS run on pywebview worker threads, so slow work won't freeze the win
 
 - Everything is stored under `%LOCALAPPDATA%\Tessera\`. A folder left by a build from when the app was called Toolbox (`%LOCALAPPDATA%\Toolbox\`) is moved there on first start:
   - `settings.json`: pins and preferences.
+  - `history.db` (with `-wal` and `-shm` while the app runs): the activity history.
   - `toolbox.log`: the log.
   - `webview\`: WebView storage.
   - `tectonic\`: the LaTeX engine (see below).
   - `latex\untitled-N\`: new LaTeX documents until you **Save as** somewhere else.
   - `models\`: the AI models, once downloaded.
+- **Activity history.** Every tool run is recorded in `history.db`: the tool, its input and output files (paths and sizes), when it ran, how long it took, and the error if it failed. Tool options are never stored, so passwords given to Protect, Unlock or Sign don't reach the disk. The **History** button in the top bar lists it, newest first, with search, Open / Show in folder, and a way to remove entries or clear everything. Untick **Keep history** there to stop recording. The newest 5,000 runs are kept. It's SQLite in WAL mode, so two open copies of the app can write to it at once, and a problem with the database never fails a tool: recording just stops for that session. Code: `backend/toolbox/services/history.py`, the `@_records` decorator in `api.py`, and `frontend/src/components/HistoryPanel.tsx`.
 - **First launch: LaTeX engine download.** If no LaTeX engine is installed (Tectonic, or a MiKTeX/TeX Live pdfLaTeX, XeLaTeX or LuaLaTeX), the app downloads Tectonic 0.15.0 from its GitHub release in the background (a 19 MB download), checks its SHA-256 checksum, and compiles a small document once so the common LaTeX packages are cached (about 12 MB more, from Tectonic's package server, kept in `%LOCALAPPDATA%\TectonicProject`). This takes about two minutes and only happens once. The status bar shows progress; the rest of the app works meanwhile. If it fails (for example, offline), the status panel and the LaTeX editor offer to try again. Tectonic fetches any other package the first time a document uses it.
 - **AI models, on first use.** Nothing is downloaded until you use an AI tool. The first time, Upscale downloads Real-ESRGAN General x4v3 (4.5 MB, BSD-3, from Qualcomm AI Hub) and Remove background downloads ISNet general-use (179 MB, Apache-2.0, from the rembg project's GitHub release), with a progress bar. Each is checked against its SHA-256 checksum before use (a mismatch is discarded) and kept for next time. After that the tools work offline, and images never leave the computer. They run on the graphics card through DirectML when possible, otherwise on the CPU. Blur face needs no download.
 - **HTML to Image** renders in an off-screen window (out of sight and out of the taskbar), because Chromium only draws, and can only screenshot, a window that has been shown.
@@ -393,3 +423,30 @@ Calls from JS run on pywebview worker threads, so slow work won't freeze the win
 - OCR uses Tesseract if it's installed (`C:\Program Files\Tesseract-OCR`), with whichever languages it has. Otherwise it uses Windows OCR, which supports the languages installed in Windows Settings → Time & language → Language (those with "Optical character recognition").
 - The built UI is served from `127.0.0.1:47821`. A fixed port keeps `localStorage` between launches. pywebview's shared default port (42001) isn't used, because other pywebview apps that keep storage use it too, and on Windows two apps on the same port can end up showing each other's pages. If 47821 is already taken, the app uses a random free port for that session.
 - WebView2 is preinstalled on Windows 11 and current Windows 10. For older machines, ship Microsoft's [Evergreen bootstrapper](https://developer.microsoft.com/microsoft-edge/webview2/).
+
+## Website and screenshots
+
+The website and user documentation live in `website/` (VitePress) and are published to GitHub Pages by `.github/workflows/pages.yml`.
+
+```powershell
+cd website; npm install; npm run dev     # http://localhost:5174/tessera/
+```
+
+The screenshots are real: `scripts/screenshots.py` generates fictional demo files, runs the built UI against the real Python backend through a small local bridge, and captures it with headless Microsoft Edge. Browsing is confined to the demo folder, and the app's data folder is a temporary one, so nothing personal can appear. After a UI change:
+
+```powershell
+cd frontend; npm run build; cd ..
+.venv\Scripts\python scripts\screenshots.py            # or name scenes: merge history
+```
+
+## Contributing
+
+Bug reports, ideas and pull requests are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). Please report security problems privately, as described in [SECURITY.md](SECURITY.md).
+
+## License
+
+Copyright (C) 2026 epicabdou.
+
+Tessera is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY. See [LICENSE](LICENSE) for the full text.
+
+Tessera bundles and downloads third-party components under their own licenses: see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). iLovePDF and iLoveIMG are trademarks of their respective owners; Tessera is not affiliated with them.

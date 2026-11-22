@@ -3,6 +3,7 @@ name = "tessera"
 version = "0.1.0"
 description = "Tessera: PDF and image tools that run on your own computer. React UI, Python business logic, packaged with PyInstaller."
 requires-python = ">=3.11"
+license = "GPL-3.0-or-later"
 
 [tool.pytest.ini_options]
 pythonpath = ["backend"]

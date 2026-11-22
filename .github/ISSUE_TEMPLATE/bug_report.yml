@@ -1,0 +1,153 @@
+name: Bug report
+description: Something in Tessera doesn't work as it should.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. Please search the [existing issues](https://github.com/epicabdou/tessera/issues?q=is%3Aissue) first.
+
+        **Security problems** must not be reported here: follow the [security policy](https://github.com/epicabdou/tessera/security/policy) instead.
+
+  - type: input
+    id: version
+    attributes:
+      label: Tessera version
+      description: Click the status button (the green dot in the top bar) to open the About box. It shows the version.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: How is Tessera installed?
+      options:
+        - MSI installer, for me only (the default)
+        - MSI installer, for all users (ALLUSERS=1)
+        - Folder or single-file build (not installed)
+        - Running from source
+        - Not sure
+    validations:
+      required: false
+
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      description: Run `winver`, or look in Settings > System > About.
+      placeholder: "Windows 11 Home 24H2 (build 26100.4061)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: tool
+    attributes:
+      label: Tool
+      description: Which tool or part of the app is affected?
+      options:
+        - Merge PDF
+        - Split PDF
+        - Organize PDF
+        - Rotate PDF
+        - Crop
+        - Page numbers
+        - Word to PDF
+        - PowerPoint to PDF
+        - Excel to PDF
+        - JPG to PDF
+        - HTML to PDF
+        - Markdown to PDF
+        - PDF to Word
+        - PDF to PowerPoint
+        - PDF to Excel
+        - PDF to JPG
+        - PDF to Markdown
+        - Edit PDF
+        - OCR PDF
+        - PDF Forms
+        - Watermark
+        - Protect PDF
+        - Sign PDF
+        - Compress PDF
+        - Repair PDF
+        - Advanced Print
+        - LaTeX editor
+        - Compress Image
+        - Resize Image
+        - Convert to JPG
+        - Convert from JPG
+        - Crop Image
+        - Rotate Image
+        - HTML to Image
+        - Upscale Image
+        - Remove background
+        - Blur face
+        - Photo editor
+        - Watermark Image
+        - Explorer
+        - Preview panel
+        - Find a tool
+        - History
+        - Status / About box
+        - LaTeX engine or AI model download
+        - Installer (install, upgrade or uninstall)
+        - The whole app (start-up, window, crashes)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Include any error message exactly as shown.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Starting from opening Tessera. Mention the options you chose in the tool.
+      placeholder: |
+        1. Open Split PDF and choose a 12-page PDF.
+        2. Pick "Split by ranges" and type 1-3, 8.
+        3. Click Split.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: false
+
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: |
+        Paste the end of `%LOCALAPPDATA%\Tessera\toolbox.log` (paste that path into File Explorer's address bar to find it), ideally right after reproducing the problem. Remove anything private, such as file names you'd rather not share.
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: files
+    attributes:
+      label: Sample file or screenshots
+      description: If the problem happens with a particular file, attach it or a copy with private content removed. Screenshots help for UI problems.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you submit
+      options:
+        - label: I searched the existing issues and this hasn't been reported yet.
+          required: true
+        - label: This happens with the latest release of Tessera.
+          required: false

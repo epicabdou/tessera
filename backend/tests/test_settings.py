@@ -28,6 +28,7 @@ def test_defaults_when_no_file(tmp_path):
         "sidebar_width": 300,
         "preview_open": True,
         "preview_width": 360,
+        "history_enabled": True,
     }
 
 

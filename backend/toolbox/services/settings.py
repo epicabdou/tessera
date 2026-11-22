@@ -20,6 +20,7 @@ PREFERENCES: dict[str, Callable[[Any], bool]] = {
     "sidebar_width": lambda v: isinstance(v, int) and not isinstance(v, bool) and 180 <= v <= 800,
     "preview_open": lambda v: isinstance(v, bool),
     "preview_width": lambda v: isinstance(v, int) and not isinstance(v, bool) and 200 <= v <= 900,
+    "history_enabled": lambda v: isinstance(v, bool),
 }
 
 DEFAULTS: dict[str, Any] = {
@@ -28,6 +29,7 @@ DEFAULTS: dict[str, Any] = {
     "sidebar_width": 300,
     "preview_open": True,
     "preview_width": 360,
+    "history_enabled": True,
 }
 
 
@@ -77,6 +79,11 @@ class Settings:
         with self._lock:
             prefs = dict(self._prefs)
         return {**prefs, "pinned": self.pinned()}
+
+    def preference(self, key: str) -> Any:
+        """One preference, without the cost of describing the pinned folders."""
+        with self._lock:
+            return self._prefs[key]
 
     def pinned(self) -> list[dict]:
         with self._lock:

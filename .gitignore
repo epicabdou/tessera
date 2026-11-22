@@ -17,3 +17,6 @@ node_modules/
 .idea/
 .DS_Store
 Thumbs.db
+
+# WiX extension cache (scripts/build.py --msi restores it)
+.wix/

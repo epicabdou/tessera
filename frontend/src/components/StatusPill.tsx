@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { APP_NAME, TAGLINE } from '../brand'
+import { APP_NAME, COPYRIGHT, TAGLINE } from '../brand'
 import { call, type BridgeState, type OcrEngines, type SystemInfo } from '../lib/bridge'
 import { latexSummary, useComponents } from '../lib/useComponents'
 
@@ -132,6 +132,28 @@ function About({ bridge }: { bridge: BridgeState }) {
           Retry LaTeX setup
         </button>
       )}
+      <footer className="about-legal small">
+        <p className="muted">
+          {COPYRIGHT}. {APP_NAME} is free software under the GNU GPL, version 3 or later, and comes with absolutely no warranty.
+        </p>
+        <p className="about-links">
+          <button type="button" onClick={() => void call('open_link', 'website')}>
+            Website
+          </button>
+          <button type="button" onClick={() => void call('open_link', 'docs')}>
+            Help
+          </button>
+          <button type="button" onClick={() => void call('open_link', 'source')}>
+            Source code
+          </button>
+          <button type="button" onClick={() => void call('open_link', 'license')}>
+            License
+          </button>
+          <button type="button" onClick={() => void call('open_link', 'issues')}>
+            Report a problem
+          </button>
+        </p>
+      </footer>
     </div>
   )
 }

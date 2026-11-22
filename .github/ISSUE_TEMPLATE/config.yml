@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Tessera documentation
+    url: https://epicabdou.github.io/tessera/
+    about: How each tool works, with answers to common questions.
+  - name: Get help
+    url: https://epicabdou.github.io/tessera/support
+    about: Troubleshooting and where to ask for help.
+  - name: Report a security vulnerability
+    url: https://github.com/epicabdou/tessera/security/advisories/new
+    about: Please report security problems privately, not in a public issue.

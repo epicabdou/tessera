@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { APP_NAME, TAGLINE } from './brand'
 import { FileBrowser } from './browser/FileBrowser'
 import { CommandPalette } from './components/CommandPalette'
+import { HistoryButton } from './components/HistoryPanel'
 import { IconButton } from './components/IconButton'
 import { PanelRightIcon, SearchIcon } from './components/icons'
 import { Resizer } from './components/Resizer'
@@ -195,6 +196,7 @@ export default function App() {
                     <span className="search-label">Find a tool</span>
                     <kbd>Ctrl K</kbd>
                   </button>
+                  <HistoryButton />
                   <StatusPill bridge={bridge} />
                   <IconButton label={previewOpen ? 'Hide preview' : 'Show preview'} active={previewOpen} onClick={() => togglePreview(!previewOpen)}>
                     <PanelRightIcon size={16} />

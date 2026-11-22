@@ -65,6 +65,32 @@ export interface Preferences {
   sidebar_width: number
   preview_open: boolean
   preview_width: number
+  /** Record each tool run in the activity history. */
+  history_enabled: boolean
+}
+
+/** One tool run in the activity history (backend/toolbox/services/history.py). */
+export interface HistoryEntry {
+  id: number
+  /** Unix time, seconds. */
+  started_at: number
+  duration_ms: number
+  /** API method, e.g. "pdf_merge". */
+  action: string
+  /** The tool's name, e.g. "Merge PDF". */
+  label: string
+  status: 'ok' | 'error'
+  error: string | null
+  inputs: { path: string; name: string }[]
+  /** `exists` is false once the file has been moved or deleted. */
+  outputs: { path: string; name: string; size: number | null; exists: boolean }[]
+}
+
+export interface HistoryPage {
+  entries: HistoryEntry[]
+  /** More, older entries: ask again with `before_id` = the last entry's id. */
+  more: boolean
+  enabled: boolean
 }
 
 export interface FolderSummary {
@@ -426,10 +452,16 @@ export interface PyApi {
   pin_folder(path: string, index: number | null): Promise<PinnedFolder[]>
   unpin_folder(path: string): Promise<PinnedFolder[]>
 
+  history_list(query: string, limit: number, beforeId: number | null): Promise<HistoryPage>
+  history_delete(ids: number[]): Promise<void>
+  history_clear(): Promise<void>
+
   get_locations(): Promise<QuickLocation[]>
   resolve_dir(path: string): Promise<string>
   list_dir(path: string, showHidden: boolean): Promise<DirListing>
   open_path(path: string): Promise<void>
+  /** One of the project's pages, in the default browser (backend/toolbox/__init__.py LINKS). */
+  open_link(name: 'website' | 'docs' | 'source' | 'issues' | 'license'): Promise<void>
   reveal_path(path: string): Promise<void>
   read_text_file(path: string): Promise<TextFile>
   preview_file(path: string): Promise<FilePreview>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The Tessera MSI. Build it with scripts\build.py and its "msi" option (see README).
+  WiX 5 is pinned in dotnet-tools.json; build.py passes the variables below.
+
+  Per-user by default: installs to %LocalAppData%\Programs\Tessera, no admin rights needed.
+  For every user of the PC, in Program Files (elevated):  msiexec /i Tessera-<version>-x64.msi ALLUSERS=1
+
+  Variables: ProductName, Manufacturer, Version, Description, SourceDir (the PyInstaller folder build), AssetsDir.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <!-- UpgradeCode identifies the product across versions: never change it, or upgrades install side by side. -->
+  <Package Name="$(var.ProductName)"
+           Manufacturer="$(var.Manufacturer)"
+           Version="$(var.Version)"
+           UpgradeCode="FCFC397D-2456-46CE-8E8A-D605A5E564C7"
+           Scope="perUserOrMachine"
+           Language="1033">
+    <SummaryInformation Description="$(var.ProductName) installer" />
+
+    <!-- A newer MSI replaces the installed one; an older one refuses to run over it. -->
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <!-- Installed apps list: icon and comment. -->
+    <Icon Id="ProductIcon" SourceFile="$(var.AssetsDir)\icon.ico" />
+    <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
+    <Property Id="ARPCOMMENTS" Value="$(var.Description)" />
+    <SetProperty Id="ARPINSTALLLOCATION" Value="[INSTALLFOLDER]" After="CostFinalize" />
+
+    <!-- Per-user installs are redirected to %LocalAppData%\Programs. -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="$(var.ProductName)" />
+    </StandardDirectory>
+
+    <Feature Id="Main" Title="$(var.ProductName)" AllowAbsent="no">
+      <Component Directory="INSTALLFOLDER">
+        <File Id="MainExe" Source="$(var.SourceDir)\$(var.ProductName).exe" KeyPath="yes" />
+      </Component>
+      <Files Directory="INSTALLFOLDER" Include="$(var.SourceDir)\**">
+        <Exclude Files="$(var.SourceDir)\$(var.ProductName).exe" />
+      </Files>
+      <ComponentRef Id="StartMenuShortcut" />
+    </Feature>
+
+    <!-- HKMU is HKCU for a per-user install and HKLM for a per-machine one, matching where the Start menu
+         shortcut goes. ICE57 can't tell that in a dual-purpose package, so build.py skips that one check. -->
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Component Id="StartMenuShortcut">
+        <Shortcut Id="StartMenu" Name="$(var.ProductName)" Description="$(var.Description)" Target="[INSTALLFOLDER]$(var.ProductName).exe" WorkingDirectory="INSTALLFOLDER" />
+        <RegistryValue Root="HKMU" Key="Software\$(var.ProductName)" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
+
+    <!-- Dialogs: Welcome, Install, Finish (with "Launch"); see TesseraUI.wxs. Artwork from scripts\make_brand.py. -->
+    <WixVariable Id="WixUIDialogBmp" Value="$(var.AssetsDir)\installer\dialog.bmp" />
+    <WixVariable Id="WixUIBannerBmp" Value="$(var.AssetsDir)\installer\banner.bmp" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.ProductName)" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+    <CustomAction Id="LaunchApp" Directory="INSTALLFOLDER" ExeCommand="&quot;[INSTALLFOLDER]$(var.ProductName).exe&quot;" Return="asyncNoWait" />
+    <UIRef Id="TesseraUI" />
+  </Package>
+</Wix>

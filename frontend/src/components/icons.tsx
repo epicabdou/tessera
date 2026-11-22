@@ -142,6 +142,14 @@ export const PlusIcon = (p: IconProps) => (
   </Svg>
 )
 
+export const HistoryIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M3.5 12a8.5 8.5 0 1 0 2.5-6" />
+    <path d="M3.5 4v4h4" />
+    <path d="M12 7.5V12l3 2" />
+  </Svg>
+)
+
 export const CloseIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="M6 6l12 12M18 6 6 18" />
