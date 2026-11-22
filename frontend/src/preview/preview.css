@@ -1,0 +1,330 @@
+/* Right-hand Preview panel. */
+
+/* .preview-aside is a .panel (index.css). */
+
+.preview-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+  height: 60px;
+  padding: 0 10px 0 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pv-progress {
+  position: absolute;
+  top: 59px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.pv-progress::after {
+  content: "";
+  position: absolute;
+  inset: 0 60% 0 0;
+  background: var(--accent-grad);
+  animation: pv-slide 0.9s ease-in-out infinite;
+}
+
+@keyframes pv-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+.preview-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: opacity 0.12s;
+}
+
+.preview-body.is-stale {
+  opacity: 0.5;
+}
+
+.pv-empty,
+.pv-none {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: auto 0;
+  padding: 32px 12px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.pv-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.pv-header svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.pv-title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pv-title strong {
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.pv-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.pv-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: -6px;
+}
+
+/* ---- pdf ---- */
+
+.pv-pages {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pv-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+}
+
+.pv-page figcaption {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- image ---- */
+
+.pv-image {
+  display: grid;
+  place-items: center;
+  max-height: 60vh;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: zoom-in;
+  background-color: #fff;
+  background-image: linear-gradient(45deg, #e6e6e6 25%, transparent 25%), linear-gradient(-45deg, #e6e6e6 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e6e6e6 75%), linear-gradient(-45deg, transparent 75%, #e6e6e6 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+
+.pv-image img {
+  display: block;
+  max-width: 100%;
+  max-height: 60vh;
+  object-fit: contain;
+}
+
+.pv-image.is-actual {
+  place-items: start;
+  overflow: auto;
+  cursor: zoom-out;
+}
+
+.pv-image.is-actual img {
+  max-width: none;
+  max-height: none;
+}
+
+/* ---- text ---- */
+
+.pv-code {
+  display: flex;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-sunken);
+}
+
+.pv-code pre {
+  margin: 0;
+  padding: 10px 12px;
+  font: 12px/1.55 var(--mono);
+}
+
+.pv-gutter {
+  flex: none;
+  position: sticky;
+  left: 0;
+  padding-right: 10px !important;
+  border-right: 1px solid var(--border);
+  background: var(--glass-strong);
+  color: var(--text-muted);
+  text-align: right;
+  user-select: none;
+}
+
+.pv-text {
+  flex: 1;
+  white-space: pre;
+  tab-size: 4;
+}
+
+.pv-code.is-wrapped .pv-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ---- table ---- */
+
+.pv-table-wrap {
+  overflow: auto;
+  max-height: 60vh;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-elev);
+}
+
+.pv-table {
+  border-collapse: collapse;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.pv-table th,
+.pv-table td {
+  max-width: 260px;
+  padding: 4px 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.pv-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--glass-strong);
+  font-weight: 600;
+}
+
+.pv-table .rownum {
+  color: var(--text-muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- folder ---- */
+
+.pv-folder {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pv-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.pv-stats > div {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--bg-elev);
+  box-shadow: inset 0 1px 0 var(--glass-hi);
+}
+
+.pv-stats strong {
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pv-stats span {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.pv-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pv-chip {
+  padding: 2px 9px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.pv-chip b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.pv-strong {
+  color: var(--text);
+}
+
+/* ---- details ---- */
+
+.pv-details {
+  margin: 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 12.5px;
+}
+
+.pv-details > div {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.pv-details dt {
+  color: var(--text-muted);
+}
+
+.pv-details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

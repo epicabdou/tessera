@@ -1,0 +1,9 @@
+[project]
+name = "toolbox"
+version = "0.1.0"
+description = "Desktop toolbox: React UI, Python business logic, packaged with PyInstaller."
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["backend"]
+testpaths = ["backend/tests"]
