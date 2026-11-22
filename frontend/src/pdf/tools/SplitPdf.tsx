@@ -178,6 +178,9 @@ function SplitBody({ doc }: { doc: PdfInfo }) {
         })}
       </div>
 
+      <ErrorNotice error={flow.error} />
+      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => void pdf.open(f.path)} />}
+
       <div className="action-bar">
         <span className="muted">
           {files === 0 ? 'No pages selected' : `Creates ${files} ${files === 1 ? 'file' : 'files'}`}
@@ -193,9 +196,6 @@ function SplitBody({ doc }: { doc: PdfInfo }) {
           {flow.busy ? 'Splitting…' : 'Split and save to folder…'}
         </button>
       </div>
-
-      <ErrorNotice error={flow.error} />
-      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => void pdf.open(f.path)} />}
     </>
   )
 }

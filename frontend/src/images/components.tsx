@@ -418,6 +418,8 @@ export function BatchRun({
       <div className="card conv-options">
         <OutputChooser folder={folder} onChange={onFolder} what="image" />
       </div>
+      <ErrorNotice error={flow.error} />
+      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} />}
       <div className="action-bar">
         {note ?? <span />}
         <JobProgressBar busy={job.busy} progress={job.progress} label="Working…" />
@@ -425,8 +427,6 @@ export function BatchRun({
           {job.busy ? 'Working…' : count > 1 ? `${label} ${count} images` : label}
         </button>
       </div>
-      <ErrorNotice error={flow.error} />
-      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} />}
     </>
   )
 }

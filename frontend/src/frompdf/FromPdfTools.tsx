@@ -30,14 +30,14 @@ function Footer({ flow, job, label, onRun, disabled }: { flow: ReturnType<typeof
   const { openInTool } = useWorkspace()
   return (
     <>
+      <ErrorNotice error={flow.error} />
+      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => openInTool('pdf-pages', f.path)} />}
       <div className="action-bar">
         <JobProgressBar busy={job.busy} progress={job.progress} />
         <button type="button" className="btn btn-primary" disabled={flow.busy || job.busy || disabled} onClick={onRun}>
           {flow.busy || job.busy ? 'Converting…' : label}
         </button>
       </div>
-      <ErrorNotice error={flow.error} />
-      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => openInTool('pdf-pages', f.path)} />}
     </>
   )
 }

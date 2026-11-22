@@ -1,4 +1,8 @@
-"""Toolbox desktop app: Python business logic behind a React UI."""
+"""Tessera desktop app: Python business logic behind a React UI.
 
-APP_NAME = "Toolbox"
+The Python package keeps its original name, ``toolbox``; only the product is called Tessera.
+"""
+
+APP_NAME = "Tessera"
+TAGLINE = "PDF and image tools that run on your own computer."
 __version__ = "0.1.0"

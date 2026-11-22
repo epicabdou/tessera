@@ -1,9 +1,15 @@
-# Toolbox
+<img src="frontend/public/favicon.svg" alt="" width="72" height="72">
 
-A desktop app with a **React** UI and **Python** business logic, shipped as a native Windows executable.
+# Tessera
+
+**PDF and image tools that run on your own computer.**
+
+Merge, split, convert, sign, protect, OCR and compress PDFs; resize, convert, crop and enhance images; write LaTeX. Your files are processed on your PC, never uploaded.
+
+Under the hood it's a desktop app with a **React** UI and **Python** business logic, shipped as a native Windows executable.
 
 ```
-┌──────────────── Toolbox.exe ─────────────────┐
+┌──────────────── Tessera.exe ─────────────────┐
 │  Native window (pywebview → WebView2)        │
 │  ┌────────────────────────────────────────┐  │
 │  │ React + TypeScript (Vite)              │  │
@@ -19,7 +25,7 @@ A desktop app with a **React** UI and **Python** business logic, shipped as a na
 
 - **[pywebview](https://pywebview.flowrl.com/)** opens a native window using the WebView2 runtime built into Windows 10/11. Python methods are callable from JavaScript directly, so there's no REST API and no open port for the bridge.
 - **Vite + React + TypeScript** for the UI, with hot reload during development.
-- **PyInstaller** bundles Python, the backend and the built UI into `Toolbox.exe`.
+- **PyInstaller** bundles Python, the backend and the built UI into `Tessera.exe`.
 - **pypdf** (BSD) edits PDFs and **pypdfium2** (PDFium, Apache/BSD) renders page previews. Both have permissive licences, so you can ship the app however you like. PyMuPDF was avoided because it is AGPL.
 - **pywin32** drives Microsoft Office for document conversion. **markdown-it-py** and **Pygments** render Markdown. All three are permissively licensed.
 - **pdfplumber**, **python-docx**, **python-pptx** and **openpyxl** (all MIT) convert PDFs to Office files. **ReportLab** (BSD) draws text, images and shapes onto pages. **pyHanko** (MIT) and **cryptography** (Apache/BSD) make and check digital signatures. OCR uses **Tesseract** when it's installed, otherwise the OCR engine built into Windows (through the **winrt** packages).
@@ -70,7 +76,7 @@ The Preview panel shows whatever is selected in the Explorer. It follows arrow-k
 
 Every preview has **Open**, **Show in folder** and **Copy path** buttons. Hide the panel with its × button, and bring it back with the panel button at the right of the top bar.
 
-Pins, the last folder, the hidden-items toggle, both panel widths and whether the Preview is open are saved by Python in `%LOCALAPPDATA%\Toolbox\settings.json`.
+Pins, the last folder, the hidden-items toggle, both panel widths and whether the Preview is open are saved by Python in `%LOCALAPPDATA%\Tessera\settings.json`.
 
 ## Tools
 
@@ -226,13 +232,13 @@ Opening `http://127.0.0.1:5173` in a regular browser shows the UI, but it can't 
 .venv\Scripts\python scripts\build.py
 ```
 
-This produces `dist\Toolbox\Toolbox.exe`, a folder build that starts fastest. Zip the `dist\Toolbox` folder to distribute it.
+This produces `dist\Tessera\Tessera.exe`, a folder build that starts fastest. Zip the `dist\Tessera` folder to distribute it.
 
 ```powershell
 .venv\Scripts\python scripts\build.py --onefile
 ```
 
-This produces a single `dist\Toolbox.exe`. It's easier to hand around, but it starts more slowly because it unpacks itself to a temporary folder on every launch.
+This produces a single `dist\Tessera.exe`. It's easier to hand around, but it starts more slowly because it unpacks itself to a temporary folder on every launch.
 
 To set an app icon, put an `.ico` file at `assets\icon.ico` before building.
 
@@ -253,11 +259,11 @@ $env:TOOLBOX_OFFICE_TESTS = "1"; .venv\Scripts\python -m pytest backend/tests/te
 The image AI tests use stand-in models by default (to check tiling, masking and the checksum-verified download exactly). To also run the real models, point `TOOLBOX_AI_MODELS` at a models folder, such as the app's own:
 
 ```powershell
-$env:TOOLBOX_AI_MODELS = "$env:LOCALAPPDATA\Toolbox\models"; .venv\Scripts\python -m pytest backend/tests/test_images.py
+$env:TOOLBOX_AI_MODELS = "$env:LOCALAPPDATA\Tessera\models"; .venv\Scripts\python -m pytest backend/tests/test_images.py
 ```
 
 ```powershell
-dist\Toolbox\Toolbox.exe --self-test
+dist\Tessera\Tessera.exe --self-test
 ```
 
 The self-test checks the whole stack:
@@ -341,6 +347,9 @@ frontend/
 scripts/
   dev.py                   Vite + window, one command
   build.py                 frontend build + PyInstaller
+  make_brand.py            regenerates the logo (favicon.svg) and the Windows icon (assets/icon.ico)
+assets/
+  icon.ico                 the app icon, 16–256 px
 ```
 
 ## Adding a feature
@@ -358,9 +367,19 @@ scripts/
 
 Calls from JS run on pywebview worker threads, so slow work won't freeze the window. Show a busy state in the UI while you wait.
 
+## Brand
+
+- **Name.** A *tessera* is one small tile of a mosaic. Tessera is many small tools that make one whole.
+- **Tagline.** "PDF and image tools that run on your own computer." Lead with what the app does and that files stay on the PC.
+- **Mark.** A "T" laid from five white tiles on a rounded gradient square. From 32 px up, the four empty cells of the 3 × 3 grid show faintly. Use it as is: don't recolour the tiles, add effects, or set it on a busy background.
+- **Wordmark.** "Tessera" in Segoe UI Variable Display, bold, next to the mark (as in the app header).
+- **Colour.** The aurora gradient, `#7c6cff` → `#4f8bff` → `#36c5ef` (violet, blue, cyan) at 135°, is `--accent-grad` in `src/index.css`. Ink is `#090c18` (dark theme background).
+- **Where the name lives.** `APP_NAME` / `TAGLINE` in `backend/toolbox/__init__.py` (window title, exe name, data folder, About box) and `frontend/src/brand.ts` (UI). The Python package and internal identifiers (`toolbox`, `TOOLBOX_*` test variables, drag-and-drop types, storage keys) keep the old name on purpose: renaming them would only break saved state.
+- **Logo files** are generated: edit `scripts/make_brand.py`, then run `.venv\Scripts\python scripts\make_brand.py`.
+
 ## Runtime notes
 
-- Everything is stored under `%LOCALAPPDATA%\Toolbox\`:
+- Everything is stored under `%LOCALAPPDATA%\Tessera\`. A folder left by a build from when the app was called Toolbox (`%LOCALAPPDATA%\Toolbox\`) is moved there on first start:
   - `settings.json`: pins and preferences.
   - `toolbox.log`: the log.
   - `webview\`: WebView storage.

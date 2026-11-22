@@ -85,7 +85,9 @@ export function PathGate({ tool, children }: { tool: ToolId; children: (path: st
         </div>
       </div>
       {error && <div className="notice notice-error">{error}</div>}
-      <div key={`${file.path}|${file.nonce}`}>{children(file.path, open)}</div>
+      <div key={`${file.path}|${file.nonce}`} className="tool-body">
+        {children(file.path, open)}
+      </div>
     </>
   )
 }

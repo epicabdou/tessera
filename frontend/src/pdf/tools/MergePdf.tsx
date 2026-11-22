@@ -177,6 +177,11 @@ export function MergePdf() {
         {dropSlot !== null && dropSlot === items.length && items.length > 0 && <li className="drop-end" aria-hidden="true" />}
       </ol>
 
+      <ErrorNotice error={flow.error} />
+      {flow.saved && (
+        <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => openInTool('pdf-organize', f.path)} />
+      )}
+
       {items.length > 0 && (
         <div className="action-bar">
           <label className="check">
@@ -199,11 +204,6 @@ export function MergePdf() {
             {flow.busy ? 'Merging…' : 'Merge and save…'}
           </button>
         </div>
-      )}
-
-      <ErrorNotice error={flow.error} />
-      {flow.saved && (
-        <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => openInTool('pdf-organize', f.path)} />
       )}
     </section>
   )

@@ -146,6 +146,9 @@ export function MarkdownToPdf() {
         <PrintOptions value={options} onChange={setOptions} />
       </div>
 
+      <ErrorNotice error={flow.error} />
+      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => openInTool('pdf-pages', f.path)} />}
+
       <div className="action-bar">
         <button
           type="button"
@@ -161,9 +164,6 @@ export function MarkdownToPdf() {
           {flow.busy ? 'Rendering…' : 'Convert and save…'}
         </button>
       </div>
-
-      <ErrorNotice error={flow.error} />
-      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => openInTool('pdf-pages', f.path)} />}
     </section>
   )
 }

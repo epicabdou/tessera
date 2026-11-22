@@ -275,6 +275,9 @@ export function ImagesToPdf() {
         {mode === 'each' && <OutputChooser folder={folder} onChange={setFolder} what="image" />}
       </div>
 
+      <ErrorNotice error={flow.error} />
+      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => openInTool('pdf-pages', f.path)} />}
+
       <div className="action-bar">
         <span className="muted">
           {items.length} {items.length === 1 ? 'image' : 'images'} · {pages} {pages === 1 ? 'page' : 'pages'}
@@ -283,9 +286,6 @@ export function ImagesToPdf() {
           {flow.busy ? 'Converting…' : mode === 'each' ? 'Convert each to PDF' : 'Convert and save…'}
         </button>
       </div>
-
-      <ErrorNotice error={flow.error} />
-      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => openInTool('pdf-pages', f.path)} />}
     </section>
   )
 }

@@ -110,6 +110,9 @@ function OcrBody({ doc }: { doc: PdfInfo }) {
         <p className="muted small">The pages keep their exact appearance; only invisible, searchable text is added.</p>
       </div>
       <ErrorNotice error={error} />
+      {summary && <p className="small">{summary}</p>}
+      <ErrorNotice error={flow.error} />
+      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => void pdf.open(f.path)} />}
       <div className="action-bar">
         <JobProgressBar busy={job.busy} progress={job.progress} label="Starting OCR…" />
         <button
@@ -131,9 +134,6 @@ function OcrBody({ doc }: { doc: PdfInfo }) {
           {job.busy ? 'Recognising…' : 'Make searchable…'}
         </button>
       </div>
-      {summary && <p className="small">{summary}</p>}
-      <ErrorNotice error={flow.error} />
-      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => void pdf.open(f.path)} />}
     </>
   )
 }

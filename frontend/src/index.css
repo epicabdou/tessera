@@ -1,5 +1,5 @@
 /* ================================================================
-   Toolbox design system: frosted-glass panels over a soft aurora.
+   Tessera design system: frosted-glass panels over a soft aurora.
    Dark by default; light follows the Windows app theme.
    ================================================================ */
 
@@ -631,6 +631,18 @@ body.is-resizing * {
   overflow: auto;
   padding: 26px 30px 30px;
   container-type: inline-size;
+}
+
+/* Each tool fills at least the visible area, so its action bar can sit at the bottom. */
+.content > [role='tabpanel'] {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.content > [role='tabpanel'] > .tool,
+.tool > .tool-body {
+  flex: 1 0 auto;
 }
 
 .statusbar {

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { APP_NAME, TAGLINE } from '../brand'
 import { call, type BridgeState, type OcrEngines, type SystemInfo } from '../lib/bridge'
 import { latexSummary, useComponents } from '../lib/useComponents'
 
@@ -106,11 +107,12 @@ function About({ bridge }: { bridge: BridgeState }) {
   ]
 
   return (
-    <div className="popover about" role="dialog" aria-label="About Toolbox">
+    <div className="popover about" role="dialog" aria-label={`About ${APP_NAME}`}>
       <div className="about-head">
         <img src="./favicon.svg" alt="" width={36} height={36} />
         <div>
-          <strong>{info?.app_name ?? 'Toolbox'}</strong>
+          <strong>{info?.app_name ?? APP_NAME}</strong>
+          <span className="small">{TAGLINE}</span>
           <span className="muted small">
             {info ? `Version ${info.app_version}` : ''}
             {latency !== null ? ` · bridge ${latency.toFixed(1)} ms` : ''}

@@ -326,6 +326,9 @@ function OrganizeBody({ doc }: { doc: PdfInfo }) {
         })}
       </div>
 
+      <ErrorNotice error={flow.error} />
+      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => void pdf.open(f.path)} />}
+
       <div className="action-bar">
         <span className="muted">
           {pages.length} {pages.length === 1 ? 'page' : 'pages'}
@@ -335,9 +338,6 @@ function OrganizeBody({ doc }: { doc: PdfInfo }) {
           {flow.busy ? 'Saving…' : 'Save PDF…'}
         </button>
       </div>
-
-      <ErrorNotice error={flow.error} />
-      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => void pdf.open(f.path)} />}
     </>
   )
 }

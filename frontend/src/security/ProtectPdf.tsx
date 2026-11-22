@@ -104,6 +104,8 @@ function ProtectForm({ info, reopen }: { info: SecurityInfo; reopen: (path: stri
           </label>
         </div>
       </div>
+      <ErrorNotice error={flow.error} />
+      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => reopen(f.path)} />}
       <div className="action-bar">
         <span className="muted small">{!openPw && !restricted ? 'Set an open password or untick a permission.' : ''}</span>
         <button
@@ -115,8 +117,6 @@ function ProtectForm({ info, reopen }: { info: SecurityInfo; reopen: (path: stri
           {flow.busy ? 'Encrypting…' : 'Protect and save…'}
         </button>
       </div>
-      <ErrorNotice error={flow.error} />
-      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => reopen(f.path)} />}
     </>
   )
 }
@@ -143,6 +143,8 @@ function UnlockForm({ info, reopen }: { info: SecurityInfo; reopen: (path: strin
         </label>
         <p className="muted small">Only remove protection from documents you own or are allowed to change.</p>
       </div>
+      <ErrorNotice error={flow.error} />
+      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => reopen(f.path)} />}
       <div className="action-bar">
         <span />
         <button
@@ -154,8 +156,6 @@ function UnlockForm({ info, reopen }: { info: SecurityInfo; reopen: (path: strin
           {flow.busy ? 'Unlocking…' : 'Unlock and save…'}
         </button>
       </div>
-      <ErrorNotice error={flow.error} />
-      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => reopen(f.path)} />}
     </>
   )
 }

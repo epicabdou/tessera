@@ -380,14 +380,14 @@ export function ConvertFromJpg() {
       <ErrorNotice error={list.error} />
       {target === 'pdf' && pdfMode === 'one' ? (
         <>
+          <ErrorNotice error={batch.flow.error} />
+          {batch.flow.saved && <ResultCard files={batch.flow.saved} onDismiss={batch.flow.dismiss} />}
           <div className="action-bar">
             <span />
             <button type="button" className="btn btn-primary" disabled={!list.good.length || batch.flow.busy} onClick={run}>
               {batch.flow.busy ? 'Working…' : 'Create PDF…'}
             </button>
           </div>
-          <ErrorNotice error={batch.flow.error} />
-          {batch.flow.saved && <ResultCard files={batch.flow.saved} onDismiss={batch.flow.dismiss} />}
         </>
       ) : (
         <BatchRun count={list.good.length} label="Convert" folder={batch.folder} onFolder={batch.setFolder} flow={batch.flow} job={batch.job} onRun={run} />

@@ -52,26 +52,6 @@ function CompressBody({ doc }: { doc: PdfInfo }) {
       <label className="check">
         <input type="checkbox" checked={strip} onChange={(e) => setStrip(e.target.checked)} /> Also remove metadata, thumbnails and embedded XMP
       </label>
-      <div className="action-bar">
-        <JobProgressBar busy={job.busy} progress={job.progress} label="Analysing…" />
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={flow.busy || job.busy}
-          onClick={async () => {
-            setSummary(null)
-            await flow.saveAs(doc.path, 'compressed', (out) =>
-              job.run(async (id) => {
-                const r = await call('pdf_compress', doc.path, out, level, strip, id)
-                setSummary({ before: r.before, after: r.after, images: r.images_recompressed, optimal: !!r.already_optimal })
-                return r
-              }),
-            )
-          }}
-        >
-          {job.busy ? 'Compressing…' : 'Compress and save…'}
-        </button>
-      </div>
       {summary && (
         <div className="card compress-summary">
           <div className="size-bars">
@@ -100,6 +80,26 @@ function CompressBody({ doc }: { doc: PdfInfo }) {
       )}
       <ErrorNotice error={flow.error} />
       {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => void pdf.open(f.path)} />}
+      <div className="action-bar">
+        <JobProgressBar busy={job.busy} progress={job.progress} label="Analysing…" />
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={flow.busy || job.busy}
+          onClick={async () => {
+            setSummary(null)
+            await flow.saveAs(doc.path, 'compressed', (out) =>
+              job.run(async (id) => {
+                const r = await call('pdf_compress', doc.path, out, level, strip, id)
+                setSummary({ before: r.before, after: r.after, images: r.images_recompressed, optimal: !!r.already_optimal })
+                return r
+              }),
+            )
+          }}
+        >
+          {job.busy ? 'Compressing…' : 'Compress and save…'}
+        </button>
+      </div>
     </>
   )
 }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { APP_NAME, TAGLINE } from './brand'
 import { FileBrowser } from './browser/FileBrowser'
 import { CommandPalette } from './components/CommandPalette'
 import { IconButton } from './components/IconButton'
@@ -152,9 +153,9 @@ export default function App() {
 
             <div className="panel main">
               <header className="topbar">
-                <div className="brand" title="Toolbox">
+                <div className="brand" title={`${APP_NAME}: ${TAGLINE}`}>
                   <img src="./favicon.svg" alt="" width={26} height={26} />
-                  <span>Toolbox</span>
+                  <span>{APP_NAME}</span>
                 </div>
                 <nav className="sections" role="tablist" aria-label="Sections">
                   {SECTIONS.map((s) => (

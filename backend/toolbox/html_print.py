@@ -13,6 +13,7 @@ from pathlib import Path
 
 import webview
 
+from . import APP_NAME
 from .services.convert.web import print_settings
 from .services.filesystem import replace_with_retry
 
@@ -56,7 +57,7 @@ def print_to_pdf(url: str, output: str, options: dict, header_title: str | None 
     tmp = out.with_name(f".{out.stem}.{os.getpid()}.printing.pdf")
 
     with _LOCK:
-        window = webview.create_window("Toolbox PDF renderer", url, hidden=True, width=1280, height=1000, focus=False)
+        window = webview.create_window(f"{APP_NAME} PDF renderer", url, hidden=True, width=1280, height=1000, focus=False)
         try:
             if not window.events.loaded.wait(LOAD_TIMEOUT):
                 raise TimeoutError(f"The page didn't load within {LOAD_TIMEOUT} seconds")
@@ -229,7 +230,7 @@ def capture_image(url: str, output: str, options: dict) -> dict:
     transparent = bool(options.get("transparent")) and iio.FORMATS.get(fmt, ("", "", False))[2]
 
     with _LOCK:
-        window = webview.create_window("Toolbox image renderer", url, hidden=True, width=width, height=height, focus=False)
+        window = webview.create_window(f"{APP_NAME} image renderer", url, hidden=True, width=width, height=height, focus=False)
         try:
             if not window.events.loaded.wait(LOAD_TIMEOUT):
                 raise TimeoutError(f"The page didn't load within {LOAD_TIMEOUT} seconds")

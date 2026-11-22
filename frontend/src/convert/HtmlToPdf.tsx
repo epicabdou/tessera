@@ -149,6 +149,9 @@ export function HtmlToPdf() {
         <PrintOptions value={options} onChange={setOptions} web={source === 'url'} />
       </div>
 
+      <ErrorNotice error={flow.error} />
+      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => openInTool('pdf-pages', f.path)} />}
+
       <div className="action-bar">
         <span className="muted small">
           {source === 'url' ? 'The page is loaded in a hidden window; sites that need a login print as a logged-out visitor.' : ''}
@@ -157,9 +160,6 @@ export function HtmlToPdf() {
           {flow.busy ? 'Rendering…' : 'Convert and save…'}
         </button>
       </div>
-
-      <ErrorNotice error={flow.error} />
-      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => openInTool('pdf-pages', f.path)} />}
     </section>
   )
 }

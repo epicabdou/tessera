@@ -25,10 +25,26 @@ def web_dir() -> Path:
     return PROJECT_ROOT / "frontend" / "dist"
 
 
+# The app was called "Toolbox" before it became Tessera; its data folder moves across on first start.
+LEGACY_DATA_DIRS = ("Toolbox",)
+# Files that show a legacy folder is ours, not another app's that happens to share the generic name.
+_DATA_MARKERS = ("settings.json", "toolbox.log")
+
+
 def user_data_dir() -> Path:
-    """Per-user writable directory for logs and WebView storage."""
+    """Per-user writable directory for settings, logs, downloaded components and WebView storage."""
     base = os.environ.get("LOCALAPPDATA") or os.environ.get("XDG_DATA_HOME")
     root = Path(base) if base else Path.home() / ".local" / "share"
     path = root / APP_NAME
+    if not path.exists():
+        for name in LEGACY_DATA_DIRS:
+            legacy = root / name
+            if legacy.is_dir() and any((legacy / m).is_file() for m in _DATA_MARKERS):
+                try:
+                    legacy.rename(path)
+                except OSError:
+                    # Still open (an old copy running?): keep using it rather than start empty.
+                    return legacy
+                break
     path.mkdir(parents=True, exist_ok=True)
     return path

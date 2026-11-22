@@ -164,11 +164,19 @@ input[type="color"]::-webkit-color-swatch {
   align-items: center;
   justify-content: flex-end;
   gap: 16px;
-  margin: 0 -30px -30px;
+  /* Bleeds over .content's side and bottom padding; the auto top margin docks it to the
+     bottom of the window when the tool is shorter than the window. Keep it the last
+     element of its tool, so results and notices go above it. */
+  margin: auto -30px -30px;
   padding: 14px 30px;
   border-top: 1px solid var(--border);
   background: var(--glass-strong);
   backdrop-filter: var(--glass-blur);
+}
+
+/* If something does follow the bar, don't pull it up underneath. */
+.action-bar:not(:last-child) {
+  margin-bottom: 0;
 }
 
 .action-bar .check {

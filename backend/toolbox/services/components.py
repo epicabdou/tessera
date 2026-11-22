@@ -18,6 +18,7 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
+from .. import APP_NAME
 from . import latex
 from .filesystem import replace_with_retry
 
@@ -98,7 +99,7 @@ class Components:
         with tempfile.TemporaryDirectory(prefix="toolbox-tectonic-") as tmp:
             archive = Path(tmp) / "tectonic.zip"
             digest = hashlib.sha256()
-            request = urllib.request.Request(TECTONIC_URL, headers={"User-Agent": "Toolbox-desktop"})
+            request = urllib.request.Request(TECTONIC_URL, headers={"User-Agent": f"{APP_NAME}-desktop"})
             with urllib.request.urlopen(request, timeout=60) as response, open(archive, "wb") as out:
                 total = int(response.headers.get("Content-Length") or 0)
                 done = 0

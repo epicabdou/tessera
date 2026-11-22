@@ -108,6 +108,9 @@ function RotateBody({ doc }: { doc: PdfInfo }) {
         ))}
       </div>
 
+      <ErrorNotice error={flow.error} />
+      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => void pdf.open(f.path)} />}
+
       <div className="action-bar">
         <span className="muted">{changed ? `${changed} of ${n} pages rotated` : 'No changes yet'}</span>
         <button
@@ -119,9 +122,6 @@ function RotateBody({ doc }: { doc: PdfInfo }) {
           {flow.busy ? 'Saving…' : 'Save rotated PDF…'}
         </button>
       </div>
-
-      <ErrorNotice error={flow.error} />
-      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => void pdf.open(f.path)} />}
     </>
   )
 }

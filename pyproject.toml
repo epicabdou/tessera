@@ -1,7 +1,7 @@
 [project]
-name = "toolbox"
+name = "tessera"
 version = "0.1.0"
-description = "Desktop toolbox: React UI, Python business logic, packaged with PyInstaller."
+description = "Tessera: PDF and image tools that run on your own computer. React UI, Python business logic, packaged with PyInstaller."
 requires-python = ">=3.11"
 
 [tool.pytest.ini_options]

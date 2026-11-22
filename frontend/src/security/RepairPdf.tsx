@@ -61,6 +61,9 @@ function RepairBody({ path }: { path: string }) {
           )}
         </div>
       </div>
+      {method && <p className="small">{describeMethod(method)}</p>}
+      <ErrorNotice error={flow.error} />
+      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => openInTool('edit-pdf', f.path)} />}
       <div className="action-bar">
         <span className="muted small">{health.healthy ? 'You can still rebuild it, for example to drop leftover data.' : ''}</span>
         <button
@@ -79,9 +82,6 @@ function RepairBody({ path }: { path: string }) {
           {flow.busy ? 'Repairing…' : 'Repair and save…'}
         </button>
       </div>
-      {method && <p className="small">{describeMethod(method)}</p>}
-      <ErrorNotice error={flow.error} />
-      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} onContinue={(f) => openInTool('edit-pdf', f.path)} />}
     </>
   )
 }

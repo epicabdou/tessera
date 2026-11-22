@@ -2,7 +2,7 @@
 ONNX Runtime (DirectML on the GPU when available, otherwise the CPU).
 
 Models are downloaded the first time a tool needs them, checked against a SHA-256
-checksum, and kept in %LOCALAPPDATA%\\Toolbox\\models. Nothing is sent anywhere.
+checksum, and kept in %LOCALAPPDATA%\\Tessera\\models. Nothing is sent anywhere.
 """
 
 from __future__ import annotations
@@ -19,6 +19,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageFilter
 
+from ... import APP_NAME
 from ..filesystem import replace_with_retry
 from ..progress import Progress
 from . import imageio as iio
@@ -86,7 +87,7 @@ class Models:
         with tempfile.TemporaryDirectory(prefix="toolbox-model-") as tmp:
             file = Path(tmp) / "download"
             digest = hashlib.sha256()
-            request = urllib.request.Request(meta["url"], headers={"User-Agent": "Toolbox-desktop"})
+            request = urllib.request.Request(meta["url"], headers={"User-Agent": f"{APP_NAME}-desktop"})
             with urllib.request.urlopen(request, timeout=60) as response, open(file, "wb") as out:
                 total = int(response.headers.get("Content-Length") or meta["size"])
                 done = 0

@@ -246,7 +246,7 @@ export function HtmlToImage() {
   const [kind, setKind] = useState<'url' | 'file' | 'code'>('url')
   const [url, setUrl] = useState('')
   const [file, setFile] = useState<string | null>(null)
-  const [code, setCode] = useState('<div style="padding:40px;font:600 42px Segoe UI;background:linear-gradient(135deg,#6a5cff,#22b5e6);color:white;border-radius:24px">Hello from Toolbox</div>')
+  const [code, setCode] = useState('<div style="padding:40px;font:600 42px Segoe UI;background:linear-gradient(135deg,#6a5cff,#22b5e6);color:white;border-radius:24px">Hello from Tessera</div>')
   const [viewport, setViewport] = useState(1280)
   const [custom, setCustom] = useState(1000)
   const [full, setFull] = useState(true)
@@ -392,6 +392,13 @@ export function HtmlToImage() {
         </div>
       </div>
       <ErrorNotice error={error} />
+      <ErrorNotice error={flow.error} />
+      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} />}
+      {shot && (
+        <div className="card shot-card">
+          <ImageStage src={shot.data_url} width={shot.width} height={shot.height} maxHeight={520} checker />
+        </div>
+      )}
       <div className="action-bar">
         <span className="muted small">
           {width}px wide{scale > 1 ? ` at ${scale}× → ${width * scale}px` : ''}
@@ -400,13 +407,6 @@ export function HtmlToImage() {
           {flow.busy ? 'Rendering…' : 'Capture and save…'}
         </button>
       </div>
-      <ErrorNotice error={flow.error} />
-      {flow.saved && <ResultCard files={flow.saved} onDismiss={flow.dismiss} />}
-      {shot && (
-        <div className="card shot-card">
-          <ImageStage src={shot.data_url} width={shot.width} height={shot.height} maxHeight={520} checker />
-        </div>
-      )}
     </section>
   )
 }
