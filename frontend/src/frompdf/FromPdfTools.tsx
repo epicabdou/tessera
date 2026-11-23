@@ -78,6 +78,8 @@ function WordBody({ doc }: { doc: PdfInfo }) {
   }, [])
   const wordOk = !!engines?.office.word
   const builtin = engine === 'basic' || (engine === 'auto' && engines !== null && !wordOk)
+  // The built-in converter only writes .docx, whatever was picked before switching to it.
+  const ext = builtin ? 'docx' : fmt
 
   return (
     <>
@@ -92,7 +94,7 @@ function WordBody({ doc }: { doc: PdfInfo }) {
           </label>
           <label>
             Format
-            <select className="text-input" value={fmt} onChange={(e) => setFmt(e.target.value)}>
+            <select className="text-input" value={ext} onChange={(e) => setFmt(e.target.value)}>
               <option value="docx">Word document (.docx)</option>
               <option value="doc" disabled={builtin}>
                 Word 97–2003 (.doc)
@@ -112,9 +114,9 @@ function WordBody({ doc }: { doc: PdfInfo }) {
         label="Convert to Word…"
         onRun={() =>
           flow.saveTo(
-            () => call('frompdf_suggest', doc.path, fmt),
-            (out) => job.run((id) => call('pdf_to_word', doc.path, out, engine, builtin ? 'docx' : fmt, id)),
-            { label: 'Word documents', extensions: [builtin ? 'docx' : fmt] },
+            () => call('frompdf_suggest', doc.path, ext),
+            (out) => job.run((id) => call('pdf_to_word', doc.path, out, engine, ext, id)),
+            { label: 'Word documents', extensions: [ext] },
           )
         }
       />

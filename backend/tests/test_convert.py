@@ -1,5 +1,6 @@
 import os
 import re
+import time
 from pathlib import Path
 
 import pytest
@@ -190,6 +191,80 @@ def test_office_kind_and_validation(tmp_path):
     (tmp_path / "x.txt").write_text("hi")
     with pytest.raises(ValueError, match="can convert"):
         office.convert("word", str(tmp_path / "x.txt"))
+
+
+# --- the watchdog that keeps a hidden Office from waiting forever on a prompt ---
+
+
+def _until(condition, seconds: float = 5.0) -> None:
+    deadline = time.monotonic() + seconds
+    while not condition() and time.monotonic() < deadline:
+        time.sleep(0.05)
+
+
+@pytest.fixture
+def desktop(monkeypatch):
+    """The Win32 side of the watchdog, faked: `shown` maps a prompt's hwnd to its process."""
+    state = {"shown": {}, "pressed": [], "ended": [], "processes": {}}
+
+    def prompts(is_ours):
+        return [(hwnd, pid, "") for hwnd, pid in list(state["shown"].items()) if is_ours(pid)]
+
+    def press(hwnd):
+        state["pressed"].append(hwnd)
+        state["shown"].pop(hwnd, None)  # OK closes it
+
+    monkeypatch.setattr(office, "PROMPT_GRACE", 0.8)
+    monkeypatch.setattr(office, "_prompts", prompts)
+    monkeypatch.setattr(office, "_press_default_button", press)
+    monkeypatch.setattr(office, "_terminate", state["ended"].append)
+    monkeypatch.setattr(office, "_process_info", lambda pid: state["processes"].get(pid))
+    return state
+
+
+def test_watchdog_ends_office_stuck_on_its_own_prompt(desktop):
+    desktop["shown"][11] = 4242  # e.g. "The last time you opened X, it caused a serious error..."
+    dog = office._Watchdog(4242)
+    _until(lambda: dog.reason)
+    dog.stop()
+    assert desktop["ended"] == [4242] and desktop["pressed"] == []
+    assert "can't be answered" in dog.reason
+
+
+def test_watchdog_answers_the_pdf_import_notice(desktop):
+    # PDFREFLOW.EXE, started for this job, shows "Word will now convert your PDF..."
+    desktop["processes"][777] = ("pdfreflow.exe", time.time())
+    desktop["shown"][22] = 777
+    dog = office._Watchdog(4242, helpers=("PDFREFLOW.EXE",))
+    _until(lambda: desktop["pressed"])
+    time.sleep(1.2)
+    dog.stop()
+    assert desktop["pressed"] == [22] and desktop["ended"] == [] and dog.reason is None
+
+
+def test_watchdog_leaves_other_processes_alone(desktop):
+    desktop["processes"][777] = ("pdfreflow.exe", time.time() - 600)  # the user's own Word, started earlier
+    desktop["processes"][888] = ("notepad.exe", time.time())
+    desktop["shown"].update({22: 777, 33: 888})
+    dog = office._Watchdog(4242, helpers=("PDFREFLOW.EXE",))
+    time.sleep(1.5)
+    dog.stop()
+    assert desktop["pressed"] == [] and desktop["ended"] == [] and dog.reason is None
+
+
+def test_watchdog_time_limit(desktop):
+    dog = office._Watchdog(4242, timeout=0.6)
+    _until(lambda: dog.reason)
+    dog.stop()
+    assert desktop["ended"] == [4242] and "didn't finish" in dog.reason
+
+
+def test_stopped_watchdog_never_ends_office(desktop):
+    desktop["shown"][11] = 4242
+    dog = office._Watchdog(4242)
+    dog.stop()  # the job finished first
+    time.sleep(1.2)
+    assert desktop["ended"] == [] and dog.reason is None
 
 
 # Real conversions start Office / LibreOffice (slow): opt in with TOOLBOX_OFFICE_TESTS=1.

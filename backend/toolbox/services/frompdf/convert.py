@@ -5,17 +5,20 @@ from __future__ import annotations
 import io
 import os
 import re
+import shutil
+import tempfile
 from pathlib import Path
+from statistics import median
 
 import pdfplumber
 import pypdfium2 as pdfium
-from pypdf import PdfReader
+from pypdf import PdfWriter
 
 from ..filesystem import replace_with_retry
 from ..pdf import render
 from ..pdf.common import open_reader, unique_path
 from ..progress import Progress
-from .structure import Block, document_blocks
+from .structure import MARKER_RE, NO_TEXT, Block, inside, document_blocks, require_text
 
 
 def _atomic(output: str | Path, ext: str) -> tuple[Path, Path]:
@@ -49,7 +52,7 @@ def to_word(path: str, output: str, engine: str = "auto", fmt: str = "docx", pro
     text structure (headings, lists, tables) with python-docx."""
     from ..convert import office
 
-    open_reader(path)  # clear error for unreadable / protected files
+    reader = open_reader(path)  # clear error for unreadable / protected files
     if fmt not in ("docx", "doc"):
         raise ValueError(f"Unknown format: {fmt!r}")
     word_ok = office.engines()["office"]["word"]
@@ -64,12 +67,23 @@ def to_word(path: str, output: str, engine: str = "auto", fmt: str = "docx", pro
         if engine == "word":
             if progress:
                 progress(0, 1, "Microsoft Word is converting the PDF…")
+            # Word opens a private copy: if a run is ever cut short, Word remembers that path as
+            # one that "caused a serious error" and asks about it next time, which would block
+            # every later conversion of the user's file.
+            work_dir = Path(tempfile.mkdtemp(prefix="tessera-word-"))
+            copy = work_dir / Path(path).name
+            if reader.is_encrypted:
+                # Opens without a password but restricts editing: Word refuses those ("it may be
+                # corrupted"), so it gets the decrypted pages.
+                PdfWriter(clone_from=reader).write(copy)
+            else:
+                shutil.copyfile(path, copy)
 
             def work(word):
                 word.Visible = False
                 word.DisplayAlerts = 0
                 doc = word.Documents.Open(
-                    FileName=str(Path(path).resolve()),
+                    FileName=str(copy),
                     ConfirmConversions=False,
                     ReadOnly=True,
                     AddToRecentFiles=False,
@@ -81,11 +95,15 @@ def to_word(path: str, output: str, engine: str = "auto", fmt: str = "docx", pro
                 finally:
                     doc.Close(SaveChanges=0)
 
-            with office._LOCK:
-                try:
-                    office._run_office("Word.Application", "Documents", work)
-                except RuntimeError as exc:
-                    raise RuntimeError(f"Microsoft Word couldn't convert the PDF: {exc}") from None
+            try:
+                with office._LOCK:
+                    # PDFREFLOW.EXE does the import and first asks "Word will now convert your PDF…":
+                    # DisplayAlerts doesn't reach it, so the watchdog answers OK.
+                    office._run_office("Word.Application", "Documents", work, helpers=("PDFREFLOW.EXE",))
+            except RuntimeError as exc:
+                raise RuntimeError(f"Microsoft Word couldn't convert the PDF: {exc}. Try again, or choose the built-in converter.") from None
+            finally:
+                shutil.rmtree(work_dir, ignore_errors=True)
         else:
             _basic_docx(path, tmp, progress)
         return _finish(tmp, out, engine=engine)
@@ -98,7 +116,7 @@ def _basic_docx(path: str, target: Path, progress: Progress | None) -> None:
     from docx.enum.text import WD_BREAK
 
     doc = Document()
-    pages = document_blocks(path, progress=progress)
+    pages = require_text(path, document_blocks(path, progress=progress))
     for n, blocks in enumerate(pages):
         for b in blocks:
             if b.kind == "heading":
@@ -185,6 +203,8 @@ def to_number(text: str):
     s = (text or "").strip()
     if not s or not _NUMBER.match(s):
         return text
+    if re.match(r"^[-+]?0\d", s):
+        return text  # a code, not an amount: "007", ZIP codes, phone numbers keep their leading zeros
     negative = s.startswith("(") and s.endswith(")")
     percent = s.endswith("%")
     s = s.strip("()%").replace("$", "").replace("€", "").replace("£", "").replace("¥", "").replace(" ", "").replace("'", "")
@@ -207,8 +227,86 @@ def to_number(text: str):
     return int(value) if value.is_integer() and not percent and "." not in s else value
 
 
+TEXT_TABLES = {"vertical_strategy": "text", "horizontal_strategy": "text", "min_words_vertical": 2}
+
+Rows = list[list[str | None]]
+
+
+def _text_rows(words: list[dict]) -> list[list[dict]]:
+    rows: list[list[dict]] = []
+    for w in sorted(words, key=lambda w: (w["top"], w["x0"])):
+        if rows and abs(rows[-1][0]["top"] - w["top"]) <= 2:
+            rows[-1].append(w)
+        else:
+            rows.append([w])
+    for row in rows:
+        row.sort(key=lambda w: w["x0"])
+    return rows
+
+
+def _tabular_regions(words: list[dict]) -> list[tuple[float, float, float, float]]:
+    """Where a table without lines may be: runs of two or more consecutive lines that wide gaps
+    split into cells. Prose lines only have word spaces, so they're never part of one."""
+    regions: list[tuple[float, float, float, float]] = []
+    run: list[list[dict]] = []
+
+    def close() -> None:
+        if len(run) >= 2:
+            ws = [w for row in run for w in row]
+            regions.append((min(w["x0"] for w in ws) - 1, min(w["top"] for w in ws) - 1, max(w["x1"] for w in ws) + 1, max(w["bottom"] for w in ws) + 1))
+        run.clear()
+
+    for row in _text_rows(words):
+        height = median(w["bottom"] - w["top"] for w in row)
+        text = row[1:] if len(row) > 1 and MARKER_RE.match(row[0]["text"]) else row  # "•   item" is a list, not 2 cells
+        cells = 1 + sum(1 for a, b in zip(text, text[1:]) if b["x0"] - a["x1"] > max(6.0, height))
+        close_to_last = bool(run) and min(w["top"] for w in row) - max(w["bottom"] for w in run[-1]) < 2.5 * height
+        if cells < 2 or not close_to_last:
+            close()
+        if cells >= 2:
+            run.append(row)
+    close()
+    return regions
+
+
+def _usable(rows: Rows) -> bool:
+    """At least 2 x 2, with two filled cells in two rows."""
+    return len(rows) >= 2 and max(len(r) for r in rows) >= 2 and sum(1 for r in rows if sum(1 for c in r if (c or "").strip()) >= 2) >= 2
+
+
+def _cuts_words(table, words: list[dict]) -> bool:
+    """Whether an edge of `table` (its sides included) runs through a word, as when prose or a
+    list is read as a table: then words are split, or partly left out."""
+    x0, top, x1, bottom = table.bbox
+    edges = {c[0] for c in table.cells} | {c[2] for c in table.cells}
+    return any(
+        w["x1"] > x0 and w["x0"] < x1 and top <= (w["top"] + w["bottom"]) / 2 <= bottom and any(w["x0"] + 0.5 < e < w["x1"] - 0.5 for e in edges)
+        for w in words
+    )
+
+
+def _text_tables(page: "pdfplumber.page.Page", ruled: list[tuple], strict: bool) -> list[tuple[float, Rows]]:
+    """(top, rows) of the tables without lines on `page`, outside the `ruled` table boxes.
+
+    pdfplumber's text-alignment finder, run over a whole page, reads prose into a "table" too and
+    cuts words in two, so it only looks inside the likely regions. `strict` (automatic mode) also
+    drops any table whose edges cut words; the user's explicit "aligned text" choice keeps them."""
+    words = [w for w in page.extract_words() if not inside(w, ruled)]
+    found: list[tuple[float, Rows]] = []
+    for bbox in _tabular_regions(words):
+        x0, top, x1, bottom = page.bbox
+        region = page.within_bbox((max(bbox[0], x0), max(bbox[1], top), min(bbox[2], x1), min(bbox[3], bottom)))
+        region_words = region.extract_words()
+        for table in region.find_tables(TEXT_TABLES):
+            rows = table.extract()
+            if _usable(rows) and not (strict and _cuts_words(table, region_words)):
+                found.append((table.bbox[1], rows))
+    return found
+
+
 def to_excel(path: str, output: str, pages: list[int] | None = None, detection: str = "auto", progress: Progress | None = None) -> dict:
-    """Tables to sheets (one per table). detection: "lines" (ruled tables), "text" (aligned columns), "auto"."""
+    """Tables to sheets (one per table). detection: "lines" (ruled tables), "text" (aligned columns),
+    "auto" (ruled tables, plus clear-cut tables without lines)."""
     from openpyxl import Workbook
     from openpyxl.styles import Font
     from openpyxl.utils import get_column_letter
@@ -219,13 +317,16 @@ def to_excel(path: str, output: str, pages: list[int] | None = None, detection: 
     wb = Workbook()
     wb.remove(wb.active)
     tables_found = 0
-    text_settings = {"vertical_strategy": "text", "horizontal_strategy": "text"}
+    has_text = False
     with pdfplumber.open(path) as pdf:
         for n, i in enumerate(indexes):
             page = pdf.pages[i]
-            tables = [] if detection == "text" else page.extract_tables()
-            if not tables and detection in ("auto", "text"):
-                tables = page.extract_tables(text_settings)
+            has_text = has_text or bool(page.chars)
+            ruled = [] if detection == "text" else page.find_tables()
+            found = [(t.bbox[1], t.extract()) for t in ruled]
+            if detection in ("auto", "text"):
+                found += _text_tables(page, [t.bbox for t in ruled], strict=detection == "auto")
+            tables = [rows for _, rows in sorted(found, key=lambda f: f[0])]
             for k, table in enumerate(tables):
                 rows = [[(c or "").strip() for c in row] for row in table if any((c or "").strip() for c in row)]
                 if not rows:
@@ -243,6 +344,8 @@ def to_excel(path: str, output: str, pages: list[int] | None = None, detection: 
             if progress:
                 progress(n + 1, len(indexes), f"Page {i + 1}")
     if not tables_found:
+        if not has_text:
+            raise ValueError(NO_TEXT.format(name=Path(path).name))
         raise ValueError("No tables were found on the selected pages")
     out, tmp = _atomic(output, "xlsx")
     try:
@@ -276,18 +379,33 @@ def to_images(
     indexes = _indexes(path, pages)
     files: list[dict] = []
     if mode == "extract":
-        reader = PdfReader(path)
+        reader = open_reader(path)
+        skipped = 0
         for n, i in enumerate(indexes):
-            for k, img in enumerate(reader.pages[i].images, 1):
-                ext = Path(img.name).suffix or ".png"
-                target = unique_path(folder / f"{src.stem}_p{i + 1}_{k}{ext}")
-                target.write_bytes(img.data)
+            try:
+                images = reader.pages[i].images
+                count = len(images)
+            except Exception:  # noqa: BLE001 - a page whose image list pypdf can't read
+                images, count, skipped = None, 0, skipped + 1
+            for k in range(count):
+                # pypdf decodes each image as it's fetched: one in an encoding it can't decode
+                # mustn't cost the others.
+                try:
+                    img = images[k]
+                    data, ext = img.data, Path(img.name).suffix or ".png"
+                except Exception:  # noqa: BLE001
+                    skipped += 1
+                    continue
+                target = unique_path(folder / f"{src.stem}_p{i + 1}_{k + 1}{ext}")
+                target.write_bytes(data)
                 files.append({"path": str(target), "name": target.name, "size": target.stat().st_size})
             if progress:
                 progress(n + 1, len(indexes), f"Page {i + 1}")
         if not files:
+            if skipped:
+                raise ValueError(f"The images on the selected pages use an encoding that can't be extracted ({skipped} skipped). Save the pages as images instead.")
             raise ValueError("The selected pages contain no embedded images")
-        return {"files": files, "folder": str(folder)}
+        return {"files": files, "folder": str(folder), "skipped": skipped}
 
     with render._LOCK:
         doc = pdfium.PdfDocument(path)
@@ -358,7 +476,7 @@ def blocks_to_markdown(pages: list[list[Block]], page_breaks: bool = False) -> s
 
 def to_markdown(path: str, output: str, pages: list[int] | None = None, page_breaks: bool = False, progress: Progress | None = None) -> dict:
     indexes = _indexes(path, pages)
-    text = blocks_to_markdown(document_blocks(path, indexes, progress), page_breaks)
+    text = blocks_to_markdown(require_text(path, document_blocks(path, indexes, progress)), page_breaks)
     out, tmp = _atomic(output, "md")
     try:
         tmp.write_text(text, encoding="utf-8")
@@ -368,4 +486,4 @@ def to_markdown(path: str, output: str, pages: list[int] | None = None, page_bre
 
 
 def markdown_preview(path: str, pages: list[int] | None = None) -> str:
-    return blocks_to_markdown(document_blocks(path, _indexes(path, pages)))
+    return blocks_to_markdown(require_text(path, document_blocks(path, _indexes(path, pages))))

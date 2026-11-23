@@ -48,6 +48,50 @@ def make_report(path: Path, with_image: bool = False) -> Path:
     return path
 
 
+PROSE = (
+    "Deliveries reached every region on time this year, and the new routes through the east cut the "
+    "average journey by almost a day. The depots now share one schedule, which keeps the vans full."
+)
+
+
+def make_layout(path: Path) -> Path:
+    """What browsers and word processors print: three heading sizes, wrapped prose, list bullets
+    drawn as small dots, short address lines, and a table without lines."""
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.platypus import Paragraph
+
+    c = canvas.Canvas(str(path), pagesize=A4)
+    w, h = A4
+    # Word's Title / Heading 1 / Heading 2 sizes over 11 pt text: close together, but three levels.
+    c.setFont("Helvetica-Bold", 26)
+    c.drawString(72, h - 80, "Annual Review")
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(72, h - 115, "Operations")
+    c.setFont("Helvetica-Bold", 12.5)
+    c.drawString(72, h - 140, "Logistics")
+    para = Paragraph(PROSE, ParagraphStyle("body", fontName="Helvetica", fontSize=11, leading=14))
+    _, ph = para.wrap(w - 144, h)
+    para.drawOn(c, 72, h - 155 - ph)
+    y = h - 175 - ph
+    c.setFont("Helvetica", 11)
+    for item in ("Fleet renewed", "Two depots opened"):
+        c.circle(78, y + 3.5, 1.8, stroke=0, fill=1)  # a bullet drawn as a shape, as Chrome and Edge print them
+        c.drawString(88, y, item)
+        y -= 15
+    y -= 12
+    for line in ("Head office", "12 Rue Larbi Ben M'hidi", "Oran"):
+        c.drawString(72, y, line)
+        y -= 14
+    y -= 16
+    for row in (("Item", "Qty", "Total"), ("Steel brackets", "40", "100.00"), ("Hex bolts", "250", "30.00"), ("Delivery", "1", "25.00")):
+        for x, value in zip((72, 250, 350), row):
+            c.drawString(x, y, value)
+        y -= 16
+    c.showPage()
+    c.save()
+    return path
+
+
 def make_scan(path: Path, text: str = "Scanned invoice 4711") -> Path:
     """An image-only PDF (like a scanner makes): big black text on white, no text layer."""
     from PIL import ImageDraw, ImageFont

@@ -1,10 +1,13 @@
 import os
+from pathlib import Path
 
 import pytest
 from PIL import Image
+from pypdf import PdfReader, PdfWriter
 
-from samples import make_report
+from samples import PROSE, make_layout, make_report, make_scan
 from toolbox.services import frompdf
+from toolbox.services.convert import office
 from toolbox.services.frompdf import convert as fp
 from toolbox.services.frompdf.structure import document_blocks
 
@@ -12,6 +15,140 @@ from toolbox.services.frompdf.structure import document_blocks
 @pytest.fixture
 def report(tmp_path):
     return str(make_report(tmp_path / "report.pdf", with_image=True))
+
+
+@pytest.fixture
+def layout(tmp_path):
+    return str(make_layout(tmp_path / "layout.pdf"))
+
+
+def test_heading_levels_follow_the_documents_own_sizes(layout):
+    (page,) = document_blocks(layout)
+    headings = [(b.level, b.text) for b in page if b.kind == "heading"]
+    assert headings == [(1, "Annual Review"), (2, "Operations"), (3, "Logistics")]
+
+
+def test_only_wrapped_lines_join_a_paragraph(layout):
+    (page,) = document_blocks(layout)
+    paragraphs = [b.text for b in page if b.kind == "paragraph"]
+    assert PROSE in paragraphs  # its wrapped lines are one paragraph
+    # Short lines stay apart: an address, and the rows of a table without lines.
+    assert ["Head office", "12 Rue Larbi Ben M'hidi", "Oran"] == paragraphs[1:4]
+    assert "Steel brackets 40 100.00" in paragraphs and "Hex bolts 250 30.00" in paragraphs
+
+
+def test_bullets_drawn_as_shapes(layout):
+    (page,) = document_blocks(layout)
+    assert [b.text for b in page if b.kind == "bullet"] == ["Fleet renewed", "Two depots opened"]
+
+
+def test_excel_finds_a_table_without_lines_and_leaves_prose_alone(layout, tmp_path):
+    from openpyxl import load_workbook
+
+    for detection in ("auto", "text"):
+        res = fp.to_excel(layout, str(tmp_path / f"{detection}.xlsx"), detection=detection)
+        wb = load_workbook(res["path"])
+        assert wb.sheetnames == ["Page 1"]
+        assert [[c.value for c in row] for row in wb["Page 1"].iter_rows()] == [
+            ["Item", "Qty", "Total"],
+            ["Steel brackets", 40, 100],
+            ["Hex bolts", 250, 30],
+            ["Delivery", 1, 25],
+        ]
+    with pytest.raises(ValueError, match="No tables"):
+        fp.to_excel(layout, str(tmp_path / "lines.xlsx"), detection="lines")
+
+
+def test_a_scan_asks_for_ocr(tmp_path):
+    scan = str(make_scan(tmp_path / "scan.pdf"))
+    for convert in (
+        lambda: fp.to_word(scan, str(tmp_path / "s.docx"), engine="basic"),
+        lambda: fp.to_markdown(scan, str(tmp_path / "s.md")),
+        lambda: fp.markdown_preview(scan),
+        lambda: fp.to_excel(scan, str(tmp_path / "s.xlsx")),
+    ):
+        with pytest.raises(ValueError, match="OCR PDF"):
+            convert()
+    assert not list(tmp_path.glob("s.*"))
+
+
+@pytest.fixture
+def fake_word(monkeypatch):
+    """Office replaced by enough of Word.Application for to_word; records what it was asked to open."""
+    seen: dict = {}
+
+    class Doc:
+        def SaveAs2(self, FileName, FileFormat):
+            Path(FileName).write_bytes(b"converted")
+
+        def Close(self, SaveChanges):
+            pass
+
+    class Documents:
+        def Open(self, FileName, **kwargs):
+            seen["opened"] = FileName
+            seen["encrypted"] = PdfReader(FileName).is_encrypted
+            return Doc()
+
+    class Word:
+        pass
+
+    def run_office(progid, collection, work, helpers=()):
+        seen["helpers"] = helpers
+        if seen.get("fail"):
+            raise RuntimeError(seen["fail"])
+        word = Word()
+        word.Documents = Documents()
+        work(word)
+
+    monkeypatch.setattr(office, "_run_office", run_office)
+    monkeypatch.setattr(office, "engines", lambda: {"office": {"word": True, "excel": True, "powerpoint": True}, "libreoffice": None})
+    return seen
+
+
+def test_word_engine_opens_a_private_decrypted_copy(report, tmp_path, fake_word):
+    locked = tmp_path / "locked.pdf"
+    writer = PdfWriter(clone_from=report)
+    writer.encrypt(user_password="", owner_password="owner", algorithm="AES-256")  # opens without a password
+    writer.write(locked)
+    res = fp.to_word(str(locked), str(tmp_path / "out.docx"))
+    assert res["engine"] == "word" and Path(res["path"]).read_bytes() == b"converted"
+    opened = Path(fake_word["opened"])
+    # Never the user's own path (Word would remember it if a run were cut short), and decrypted (Word refuses those).
+    assert opened.name == "locked.pdf" and opened.parent != tmp_path and not fake_word["encrypted"]
+    assert not opened.parent.exists()  # the copy is cleaned up
+    # PDFREFLOW.EXE asks "Word will now convert your PDF…": the watchdog must look at it.
+    assert fake_word["helpers"] == ("PDFREFLOW.EXE",)
+
+
+def test_word_engine_failure_points_to_the_builtin_converter(report, tmp_path, fake_word):
+    fake_word["fail"] = "it stopped to show a message that can't be answered while it runs in the background, so it was closed"
+    with pytest.raises(RuntimeError, match="Microsoft Word couldn't convert the PDF: it stopped.*built-in converter"):
+        fp.to_word(report, str(tmp_path / "out.docx"))
+    assert not list(tmp_path.glob("*.docx")) and not list(tmp_path.glob(".*.tmp.docx"))
+
+
+def test_extract_skips_images_it_cant_decode(report, tmp_path, monkeypatch):
+    good = PdfReader(report).pages[0].images[0]
+
+    class Images:
+        def __len__(self):
+            return 2
+
+        def __getitem__(self, k):
+            if k == 0:
+                raise NotImplementedError("unsupported filter /JBIG2Decode")
+            return good
+
+    class Page:
+        images = Images()
+
+    class Reader:
+        pages = [Page(), Page()]
+
+    monkeypatch.setattr(fp, "open_reader", lambda path: Reader())
+    res = fp.to_images(report, str(tmp_path / "img"), pages=[0], mode="extract")
+    assert [f["name"] for f in res["files"]] == ["report_p1_2.png"] and res["skipped"] == 1
 
 
 def test_structure(report):
@@ -78,7 +215,23 @@ def test_excel(report, tmp_path):
 
 @pytest.mark.parametrize(
     ("text", "value"),
-    [("1,234.50", 1234.5), ("1.234,5", 1234.5), ("950", 950), ("3.50", 3.5), ("(12)", -12), ("15%", 0.15), ("12,5", 12.5), ("abc", "abc"), ("1.234.567", 1234567)],
+    [
+        ("1,234.50", 1234.5),
+        ("1.234,5", 1234.5),
+        ("950", 950),
+        ("3.50", 3.5),
+        ("(12)", -12),
+        ("15%", 0.15),
+        ("12,5", 12.5),
+        ("abc", "abc"),
+        ("1.234.567", 1234567),
+        # codes keep their leading zeros; amounts below one still become numbers
+        ("007", "007"),
+        ("0555 12 34 56", "0555 12 34 56"),
+        ("0.5", 0.5),
+        ("0,25", 0.25),
+        ("0", 0),
+    ],
 )
 def test_to_number(text, value):
     assert fp.to_number(text) == value

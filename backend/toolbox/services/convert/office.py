@@ -7,6 +7,9 @@ Safety:
 - Macros are force-disabled before a document is opened.
 - Office runs as a separate, invisible instance we start ourselves; we never
   quit an instance that already had documents open (PowerPoint is single-instance).
+- An instance we started is watched: if it stops to show a prompt nobody can see
+  (or runs far too long), it is ended and the job fails with a clear error
+  instead of waiting forever.
 """
 
 from __future__ import annotations
@@ -18,6 +21,8 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
+import uuid
 from pathlib import Path
 from typing import Callable
 
@@ -102,8 +107,230 @@ def _com_message(exc: Exception) -> str:
     return str(exc)
 
 
-def _run_office(progid: str, collection: str, work: Callable) -> None:
-    """Start Office on this thread, run `work(app)`, and close what we started."""
+OFFICE_TIMEOUT = 30 * 60  # seconds for one job: a last resort, PDF import of a long file is slow
+PROMPT_GRACE = 8.0  # seconds a prompt may stay up before the job is given up
+QUIT_GRACE = 60.0  # seconds Office gets to exit after Quit()
+
+
+def _office_pid(app) -> int | None:
+    """Process id of the Office instance behind `app`."""
+    import win32gui
+    import win32process
+
+    hwnd = 0
+    try:
+        hwnd = int(app.Hwnd)  # Excel and PowerPoint
+    except Exception:  # noqa: BLE001
+        pass
+    if not hwnd:  # Word has no Application.Hwnd: find its main window by a unique caption
+        token = f"Tessera {uuid.uuid4().hex}"
+        try:
+            app.Caption = token
+            hwnd = win32gui.FindWindow("OpusApp", token)
+        except Exception:  # noqa: BLE001
+            hwnd = 0
+    return (win32process.GetWindowThreadProcessId(hwnd)[1] or None) if hwnd else None
+
+
+def _is_prompt_class(name: str) -> bool:
+    return name in ("#32770", "NUIDialog") or name.startswith("bosa_sdm")
+
+
+def _prompts(is_ours: Callable[[int], bool]) -> list[tuple[int, int, str]]:
+    """Visible dialogs shown by processes `is_ours` accepts, as (hwnd, pid, message). The message
+    is "" when it can't be read (Office's own dialogs have no readable child windows)."""
+    import win32gui
+    import win32process
+
+    found: list[tuple[int, int, str]] = []
+
+    def child(hwnd: int, parts: list[str]) -> bool:
+        if win32gui.GetClassName(hwnd) == "Static" and win32gui.GetWindowText(hwnd).strip():
+            parts.append(win32gui.GetWindowText(hwnd).strip())
+        return True
+
+    def top(hwnd: int, _: None) -> bool:
+        if not win32gui.IsWindowVisible(hwnd) or not _is_prompt_class(win32gui.GetClassName(hwnd)):
+            return True
+        pid = win32process.GetWindowThreadProcessId(hwnd)[1]
+        if not is_ours(pid):
+            return True
+        parts: list[str] = []
+        try:
+            win32gui.EnumChildWindows(hwnd, child, parts)
+        except Exception:  # noqa: BLE001
+            pass
+        found.append((hwnd, pid, " ".join(parts)))
+        return True
+
+    try:
+        win32gui.EnumWindows(top, None)
+    except Exception:  # noqa: BLE001
+        pass
+    return found
+
+
+def _press_default_button(hwnd: int) -> None:
+    """Press Enter in a dialog, i.e. its default button (OK)."""
+    import win32api
+    import win32con
+    import win32gui
+
+    target = hwnd
+    if win32gui.GetClassName(hwnd) == "NUIDialog":  # Office's own dialogs take keys in their NetUI pane
+        kids: list[int] = []
+        try:
+            win32gui.EnumChildWindows(hwnd, lambda c, acc: acc.append(c) or True, kids)
+        except Exception:  # noqa: BLE001
+            pass
+        target = next((k for k in kids if win32gui.GetClassName(k) == "NetUIHWND"), hwnd)
+    win32api.PostMessage(target, win32con.WM_KEYDOWN, win32con.VK_RETURN, 0x001C0001)
+    win32api.PostMessage(target, win32con.WM_KEYUP, win32con.VK_RETURN, 0xC01C0001)
+
+
+def _process_info(pid: int) -> tuple[str, float] | None:
+    """(exe file name in lower case, start time as a Unix timestamp) of process `pid`."""
+    import win32api
+    import win32con
+    import win32process
+
+    try:
+        handle = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION | win32con.PROCESS_VM_READ, False, pid)
+    except Exception:  # noqa: BLE001 - gone, or not ours to inspect
+        return None
+    try:
+        exe = os.path.basename(win32process.GetModuleFileNameEx(handle, 0)).lower()
+        return exe, win32process.GetProcessTimes(handle)["CreationTime"].timestamp()
+    except Exception:  # noqa: BLE001
+        return None
+    finally:
+        win32api.CloseHandle(handle)
+
+
+def _terminate(pid: int) -> None:
+    import win32api
+    import win32con
+
+    try:
+        handle = win32api.OpenProcess(win32con.PROCESS_TERMINATE, False, pid)
+    except Exception:  # noqa: BLE001 - already gone
+        return
+    try:
+        win32api.TerminateProcess(handle, 1)
+    except Exception:  # noqa: BLE001
+        pass
+    finally:
+        win32api.CloseHandle(handle)
+
+
+def _reap_later(pid: int) -> None:
+    """End our Office instance if it is still running QUIT_GRACE seconds after Quit(): an
+    invisible Office stuck on a prompt at exit would otherwise stay in memory for good."""
+    import win32api
+    import win32con
+    import win32event
+
+    try:  # the handle pins this exact process, so a recycled pid is never hit
+        handle = win32api.OpenProcess(win32con.PROCESS_TERMINATE | win32con.SYNCHRONIZE, False, pid)
+    except Exception:  # noqa: BLE001 - already gone
+        return
+
+    def wait() -> None:
+        try:
+            if win32event.WaitForSingleObject(handle, int(QUIT_GRACE * 1000)) == win32event.WAIT_TIMEOUT:
+                log.warning("Office (pid %s) didn't exit after Quit; ending it", pid)
+                win32api.TerminateProcess(handle, 1)
+        except Exception:  # noqa: BLE001
+            pass
+        finally:
+            win32api.CloseHandle(handle)
+
+    threading.Thread(target=wait, name="office-reaper", daemon=True).start()
+
+
+class _Watchdog:
+    """Office runs hidden here, so a question it asks (crash recovery, a locked Normal.dotm...)
+    would wait forever for a click nobody can make, and the job would never end.
+
+    Prompts from `helpers` (exe names of Office's out-of-process servers started during the job,
+    such as PDFREFLOW.EXE, which does Word's PDF import and first shows "Word will now convert
+    your PDF...") are answered with their default button, as a user would. If any prompt stays up
+    for PROMPT_GRACE seconds anyway, or the job passes OFFICE_TIMEOUT, Office and those helpers
+    are ended: the pending COM call then fails, and `reason` says why."""
+
+    def __init__(self, pid: int, helpers: tuple[str, ...] = (), timeout: float = OFFICE_TIMEOUT) -> None:
+        self.pid = pid
+        self.reason: str | None = None
+        self._helpers = {h.lower() for h in helpers}
+        self._since = time.time() - 1  # helper processes started after this belong to the job
+        self._owners: dict[int, bool] = {pid: True}
+        self._timeout = timeout
+        self._lock = threading.Lock()
+        self._stopped = threading.Event()
+        self._thread = threading.Thread(target=self._watch, name="office-watchdog", daemon=True)
+        self._thread.start()
+
+    def _is_helper(self, pid: int) -> bool:
+        if pid not in self._owners:
+            info = _process_info(pid) if self._helpers else None
+            self._owners[pid] = bool(info and info[0] in self._helpers and info[1] >= self._since)
+        return self._owners[pid] and pid != self.pid
+
+    def _is_ours(self, pid: int) -> bool:
+        return pid == self.pid or self._is_helper(pid)
+
+    def _watch(self) -> None:
+        started = time.monotonic()
+        seen: dict[int, float] = {}  # prompt hwnd -> when it was first seen
+        presses: dict[int, int] = {}
+        while not self._stopped.wait(0.5):
+            now = time.monotonic()
+            prompts = _prompts(self._is_ours)
+            seen = {hwnd: seen.get(hwnd, now) for hwnd, _, _ in prompts}
+            stuck = None
+            for hwnd, pid, message in prompts:
+                age = now - seen[hwnd]
+                if pid != self.pid and age >= 0.5 and presses.get(hwnd, 0) < 3 and age >= 2 * presses.get(hwnd, 0):
+                    log.info("Answering a prompt from Office's helper (pid %s)", pid)
+                    try:
+                        _press_default_button(hwnd)
+                    except Exception:  # noqa: BLE001 - closed meanwhile
+                        pass
+                    presses[hwnd] = presses.get(hwnd, 0) + 1
+                if age >= PROMPT_GRACE:
+                    stuck = message
+            if stuck is not None:
+                said = f" (“{stuck}”)" if stuck else ""
+                reason = f"stopped to show a message{said} that can't be answered while it runs in the background"
+            elif now - started >= self._timeout:
+                reason = f"didn't finish within {int(self._timeout // 60)} minutes"
+            else:
+                continue
+            with self._lock:
+                if not self._stopped.is_set():
+                    self.reason = reason
+                    log.warning("Ending Office (pid %s): %s", self.pid, reason)
+                    self._end_all()
+            return
+
+    def _end_all(self) -> None:
+        """End Office and every helper the job started (an orphaned helper would wait forever)."""
+        import win32process
+
+        _terminate(self.pid)
+        if self._helpers:
+            for pid in win32process.EnumProcesses():
+                if pid and self._is_helper(pid):
+                    _terminate(pid)
+
+    def stop(self) -> None:
+        with self._lock:
+            self._stopped.set()
+        self._thread.join()
+
+
+def _run_office(progid: str, collection: str, work: Callable, helpers: tuple[str, ...] = ()) -> None:
+    """Start Office on this thread, run `work(app)`, and close what we started. `helpers`: see _Watchdog."""
     import pythoncom
     import pywintypes
     import win32com.client
@@ -112,17 +339,28 @@ def _run_office(progid: str, collection: str, work: Callable) -> None:
     try:
         app = win32com.client.DispatchEx(progid)
         owned = getattr(app, collection).Count == 0 and not bool(app.Visible)
+        # Only an instance we started ourselves is watched (and ended if it hangs), never the user's.
+        pid = _office_pid(app) if owned else None
+        watchdog = _Watchdog(pid, helpers) if pid else None
         try:
             app.AutomationSecurity = _FORCE_DISABLE_MACROS
             work(app)
         except pywintypes.com_error as exc:
+            if watchdog:
+                watchdog.stop()
+            if watchdog and watchdog.reason:
+                raise RuntimeError(f"it {watchdog.reason}, so it was closed") from None
             raise RuntimeError(_com_message(exc)) from None
         finally:
-            if owned:
+            if watchdog:
+                watchdog.stop()
+            if owned and not (watchdog and watchdog.reason):
                 try:
                     app.Quit()
-                except pywintypes.com_error:
+                except Exception:  # noqa: BLE001 - Office may be gone (crashed); keep the real error
                     pass
+                if pid:
+                    _reap_later(pid)
             del app
     finally:
         pythoncom.CoUninitialize()
