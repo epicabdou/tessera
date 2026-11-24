@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { APP_NAME, TAGLINE } from './brand'
 import { FileBrowser } from './browser/FileBrowser'
 import { CommandPalette } from './components/CommandPalette'
@@ -41,7 +41,15 @@ const INITIAL_NAV: Nav = {
 /** Go to a category, remembering it as its section's current one. */
 const goCategory = (n: Nav, category: CategoryId): Nav => ({ ...n, category, sections: { ...n.sections, [CATEGORIES.find((c) => c.id === category)!.section]: category } })
 
-export default function App() {
+/** For an app that embeds this UI (see lib/platform.ts); the desktop app passes none. */
+interface AppProps {
+  /** Extra controls at the right of the top bar (Tilepress Web: the account menu). */
+  topbarEnd?: ReactNode
+  /** A small badge after a tool's name in the tool row (Tilepress Web: "Pro"). */
+  toolBadge?: (tool: ToolId) => ReactNode
+}
+
+export default function App({ topbarEnd, toolBadge }: AppProps = {}) {
   const [nav, setNav] = useState<Nav>(INITIAL_NAV)
   const [bridge, setBridge] = useState<BridgeState>('connecting')
   const [selected, setSelected] = useState<FsEntry | null>(null)
@@ -201,6 +209,7 @@ export default function App() {
                   <IconButton label={previewOpen ? 'Hide preview' : 'Show preview'} active={previewOpen} onClick={() => togglePreview(!previewOpen)}>
                     <PanelRightIcon size={16} />
                   </IconButton>
+                  {topbarEnd}
                 </div>
               </header>
 
@@ -219,6 +228,7 @@ export default function App() {
                   >
                     {t.icon}
                     <span>{t.label}</span>
+                    {toolBadge?.(t.id)}
                   </button>
                 ))}
               </nav>

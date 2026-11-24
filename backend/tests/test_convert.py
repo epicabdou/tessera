@@ -136,6 +136,20 @@ def test_markdown_render(tmp_path):
         markdown.render_markdown("x", theme="nope")
 
 
+def test_markdown_root_limits_which_images_are_embedded(tmp_path):
+    inside, outside = tmp_path / "docs", tmp_path / "private"
+    inside.mkdir()
+    outside.mkdir()
+    Image.new("RGB", (4, 4)).save(inside / "ok.png")
+    Image.new("RGB", (4, 4)).save(outside / "secret.png")
+    text = f"![a](ok.png) ![b](../private/secret.png) ![c]({(outside / 'secret.png').as_posix()})"
+    out = markdown.render_markdown(text, str(inside), root=str(inside))
+    assert out.count('src="data:image/png;base64,') == 1  # only the image inside root
+    assert 'src="../private/secret.png"' in out
+    # Without root (the desktop app), every local image is embedded as before.
+    assert markdown.render_markdown(text, str(inside)).count('src="data:image/png;base64,') == 3
+
+
 def test_print_settings_and_urls():
     s = web.print_settings({"page_size": "letter", "orientation": "landscape", "margin": "narrow", "scale": 90})
     assert (s["width"], s["height"], s["landscape"], s["margin"], s["scale"]) == (8.5, 11.0, True, 0.25, 0.9)

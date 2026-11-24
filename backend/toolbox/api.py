@@ -22,9 +22,6 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
-import webview
-
-from . import html_print
 from .services import convert, filesystem, frompdf, latex, preview, progress, system_info
 from .services.editing import edit as ed_edit
 from .services.images import ai as img_ai
@@ -192,7 +189,7 @@ class Api:
         from .paths import user_data_dir
         from .services.components import Components
 
-        self._window: webview.Window | None = None
+        self._window: Any = None  # webview.Window, once the desktop app has created it
         self._settings = settings
         self._components = components or Components(user_data_dir())
         self._previews = _PreviewFiles()
@@ -215,16 +212,27 @@ class Api:
         except Exception:  # noqa: BLE001
             log.exception("Couldn't record %s in the history", action)
 
-    def _bind_window(self, window: webview.Window) -> None:
+    def _bind_window(self, window: Any) -> None:
         self._window = window
 
-    def _dialog(self, kind: webview.FileDialog, **kwargs: Any) -> list[str]:
+    def _dialog(self, kind: str, **kwargs: Any) -> list[str]:
+        """Native file dialog; ``kind`` is a ``webview.FileDialog`` member name (OPEN, FOLDER, SAVE)."""
         if self._window is None:
             raise RuntimeError("Window not ready")
-        result = self._window.create_file_dialog(kind, **kwargs)
+        # Imported here so the API (and its services) can run without pywebview, e.g. on a server.
+        import webview
+
+        result = self._window.create_file_dialog(getattr(webview.FileDialog, kind), **kwargs)
         if not result:
             return []
         return [result] if isinstance(result, str) else list(result)
+
+    def _html(self) -> Any:
+        """The HTML renderer (``print_to_pdf``, ``capture_image``): WebView2 in a hidden window.
+        Imported on first use, since it needs pywebview; a server swaps in its own."""
+        from . import html_print
+
+        return html_print
 
     # --- app ---------------------------------------------------------------
 
@@ -298,20 +306,20 @@ class Api:
 
     def pick_file(self) -> str | None:
         """Open a native file dialog; returns the chosen path or None."""
-        return next(iter(self._dialog(webview.FileDialog.OPEN)), None)
+        return next(iter(self._dialog("OPEN")), None)
 
     def pick_folder(self, directory: str = "") -> str | None:
-        return next(iter(self._dialog(webview.FileDialog.FOLDER, directory=directory or "")), None)
+        return next(iter(self._dialog("FOLDER", directory=directory or "")), None)
 
     def pick_pdfs(self, multiple: bool = False) -> list[str]:
-        return self._dialog(webview.FileDialog.OPEN, allow_multiple=multiple, file_types=PDF_TYPES)
+        return self._dialog("OPEN", allow_multiple=multiple, file_types=PDF_TYPES)
 
     def pick_files(self, label: str, extensions: list[str], multiple: bool = True) -> list[str]:
         """Open dialog filtered to `extensions`, e.g. ("Word documents", ["doc", "docx"])."""
         safe_label = "".join(c for c in label if c.isalnum() or c == " ").strip() or "Files"
         patterns = ";".join(f"*.{ext.strip('.').lower()}" for ext in extensions if ext.strip(".").isalnum())
         return self._dialog(
-            webview.FileDialog.OPEN,
+            "OPEN",
             allow_multiple=multiple,
             file_types=(f"{safe_label} ({patterns})", "All files (*.*)"),
         )
@@ -322,7 +330,7 @@ class Api:
         chosen = next(
             iter(
                 self._dialog(
-                    webview.FileDialog.SAVE,
+                    "SAVE",
                     directory=str(suggested.parent),
                     save_filename=suggested.name,
                     file_types=PDF_TYPES,
@@ -475,19 +483,19 @@ class Api:
     def html_to_image(self, kind: str, value: str, output: str, options: dict) -> dict:
         """kind: "url", "file" (a local .html file) or "code" (HTML source)."""
         if kind == "url":
-            return html_print.capture_image(convert_web.normalize_url(value), output, options)
+            return self._html().capture_image(convert_web.normalize_url(value), output, options)
         if kind == "file":
             source = Path(value)
             if not source.is_file() or source.suffix.lower() not in (".html", ".htm", ".xhtml", ".svg"):
                 raise ValueError("Choose an .html file")
-            return html_print.capture_image(source.resolve().as_uri(), output, options)
+            return self._html().capture_image(source.resolve().as_uri(), output, options)
         if kind == "code":
             if not value.strip():
                 raise ValueError("Enter some HTML")
             with tempfile.TemporaryDirectory(prefix="toolbox-html-") as tmp:
                 page = Path(tmp) / "document.html"
                 page.write_text(convert_web.html_document(value), encoding="utf-8")
-                return html_print.capture_image(page.as_uri(), output, options)
+                return self._html().capture_image(page.as_uri(), output, options)
         raise ValueError(f"Unknown HTML source: {kind!r}")
 
     # --- Images: AI -------------------------------------------------------------------
@@ -539,12 +547,12 @@ class Api:
     def html_to_pdf(self, kind: str, value: str, output: str, options: dict) -> dict:
         """kind: "url" (a web address), "file" (a local .html file) or "code" (HTML source)."""
         if kind == "url":
-            return html_print.print_to_pdf(convert_web.normalize_url(value), output, options)
+            return self._html().print_to_pdf(convert_web.normalize_url(value), output, options)
         if kind == "file":
             source = Path(value)
             if not source.is_file() or source.suffix.lower() not in (".html", ".htm", ".xhtml", ".svg"):
                 raise ValueError("Choose an .html file")
-            return html_print.print_to_pdf(source.resolve().as_uri(), output, options)
+            return self._html().print_to_pdf(source.resolve().as_uri(), output, options)
         if kind == "code":
             if not value.strip():
                 raise ValueError("Enter some HTML")
@@ -561,7 +569,7 @@ class Api:
         chosen = next(
             iter(
                 self._dialog(
-                    webview.FileDialog.SAVE,
+                    "SAVE",
                     directory=str(suggested.parent),
                     save_filename=suggested.name,
                     file_types=(f"{safe_label} ({patterns})", "All files (*.*)"),
@@ -771,4 +779,4 @@ class Api:
             page = Path(tmp) / "document.html"
             page.write_text(document, encoding="utf-8")
             # Header shows the document's title; the footer mustn't show the temp file's path.
-            return html_print.print_to_pdf(page.as_uri(), output, options, header_title=title, footer_uri=" ")
+            return self._html().print_to_pdf(page.as_uri(), output, options, header_title=title, footer_uri=" ")

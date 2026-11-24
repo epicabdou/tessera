@@ -443,6 +443,10 @@ export interface PrinterInfo {
   papers: { id: number; name: string; w_mm: number; h_mm: number }[]
 }
 
+/**
+ * Every Python method the UI calls. An app embedding this UI with its own backend (see
+ * lib/platform.ts) declares its extra methods by augmenting this interface.
+ */
 export interface PyApi {
   ping(): Promise<string>
   get_system_info(): Promise<SystemInfo>
@@ -644,6 +648,21 @@ const READY_TIMEOUT_MS = 4000
 
 let apiPromise: Promise<PyApi> | undefined
 
+/** Carries calls somewhere other than pywebview (Tilepress Web sends them to its server). */
+export type Transport = (method: string, args: unknown[]) => Promise<unknown>
+
+let transport: Transport | null = null
+
+/** Route every `call` through `t` instead of pywebview. Call before the UI first renders. */
+export function setTransport(t: Transport) {
+  transport = t
+  // Not "then": Promise.resolve() below asks for it to see whether `api` is itself a promise.
+  const api = new Proxy({} as PyApi, {
+    get: (_target, method) => (typeof method === 'string' && method !== 'then' ? (...args: unknown[]) => t(method, args) : undefined),
+  })
+  apiPromise = Promise.resolve(api)
+}
+
 function injectedApi(): PyApi | undefined {
   const api = window.pywebview?.api
   return typeof api?.ping === 'function' ? api : undefined
@@ -675,6 +694,13 @@ export async function call<K extends keyof PyApi>(
   method: K,
   ...args: Parameters<PyApi[K]>
 ): Promise<Awaited<ReturnType<PyApi[K]>>> {
+  if (transport) {
+    try {
+      return (await transport(method, args)) as Awaited<ReturnType<PyApi[K]>>
+    } catch (err) {
+      throw toError(err)
+    }
+  }
   const api = await getApi()
   const fn = api[method] as (...a: Parameters<PyApi[K]>) => ReturnType<PyApi[K]>
   try {
