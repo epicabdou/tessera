@@ -599,6 +599,8 @@ export interface PyApi {
   image_convert(paths: string[], folder: string | null, options: Record<string, unknown>, jobId: string): Promise<SavedImage[]>
   image_crop(path: string, output: string, rect: { x: number; y: number; w: number; h: number }, options: Record<string, unknown>): Promise<SavedImage>
   image_rotate(items: { path: string; turns: number; flip_h: boolean; flip_v: boolean }[], folder: string | null, options: Record<string, unknown>, jobId: string): Promise<SavedImage[]>
+  collage_preview(paths: string[], options: Record<string, unknown>, maxSide: number): Promise<RenderedImage & { full_width: number; full_height: number }>
+  collage_save(paths: string[], output: string, options: Record<string, unknown>, jobId: string): Promise<SavedImage & { photos: number }>
   html_to_image(kind: 'url' | 'file' | 'code', value: string, output: string, options: Record<string, unknown>): Promise<SavedImage>
   ai_models(): Promise<Record<'upscale' | 'background', AiModelStatus>>
   ai_upscale(path: string, output: string, scale: number, options: Record<string, unknown>, jobId: string): Promise<SavedImage>

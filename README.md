@@ -64,7 +64,7 @@ The Explorer has three parts:
   - Show hidden items: a toggle in the Explorer header.
   - Keyboard: arrow keys, Home/End, Enter, Backspace for up, `Alt+←/→` for back/forward, and type a name to jump to it.
   - Double-click: opens a file with its default app, or browses into a folder.
-  - Right-click: Pin, Open in File Explorer, Show in File Explorer and Copy path. PDFs also get **Open in PDF tools**, **Add to Merge PDF**, **Edit PDF**, **Convert from PDF**, **Sign PDF**, **Protect PDF** and **Print…**. Images get **Edit photo**, **Compress image**, **Resize image**, **Crop image**, **Remove background** and **Upscale image** (and **Convert to PDF**). Office files, HTML and Markdown get **Convert to PDF**; `.tex` files get **Open in LaTeX editor**.
+  - Right-click: Pin, Open in File Explorer, Show in File Explorer and Copy path. PDFs also get **Open in PDF tools**, **Add to Merge PDF**, **Edit PDF**, **Convert from PDF**, **Sign PDF**, **Protect PDF** and **Print…**. Images get **Edit photo**, **Compress image**, **Resize image**, **Crop image**, **Add to collage**, **Remove background** and **Upscale image** (and **Convert to PDF**). Office files, HTML and Markdown get **Convert to PDF**; `.tex` files get **Open in LaTeX editor**.
   - Drag: drag a folder onto Pinned, or a PDF onto a PDF tool.
 
 ### Preview
@@ -188,6 +188,7 @@ The image tools read JPG, PNG, WebP, HEIC/HEIF (iPhone), AVIF, GIF, BMP, TIFF an
 |---|---|
 | Crop Image | Drag the box, its corners or edges, or draw a new one; rule-of-thirds guides; aspect presets (free, original, 1:1, 4:3, 3:4, 16:9, 9:16, 3:2, 2:3, 5:4, 4:5); exact X/Y/width/height in pixels; rectangle or circle/oval (outside becomes transparent). |
 | Rotate Image | Rotate left, right or 180°, or flip, each image on its own or all at once, with live thumbnails. |
+| Photo collage | 2 to 40 photos on one canvas: a **grid** (automatic or chosen columns; photos cropped to fill their cell or shown whole), a **mosaic** (rows that keep every photo's shape, scaled to the full width), or one **featured** photo with the rest beside it. Canvas shape (1:1, 4:5, 3:2, 16:9, 9:16, A4) and width; spacing, border and rounded corners; a background colour or transparent; reorder or shuffle the photos. The preview is the real result. |
 | HTML to Image | A web page, an HTML file or HTML/CSS code, rendered at a desktop, laptop, tablet, phone or custom width, as the whole page or the visible area, at 1×, 2× or 3× sharpness, to PNG, JPG or WebP. Snippets can have a transparent background. |
 
 **AI & Smart Enhancements**

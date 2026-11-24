@@ -1,14 +1,15 @@
 ---
-title: Crop, rotate & capture
-description: Crop an image to a box, circle or aspect ratio, rotate or flip many images at once, and turn a web page or HTML into a picture.
+title: Crop, rotate, collage & capture
+description: Crop an image to a box, circle or aspect ratio, rotate or flip many images at once, put photos together in a collage, and turn a web page or HTML into a picture.
 ---
 
-# Crop, rotate & capture
+# Crop, rotate, collage & capture
 
 These tools change the frame of a picture, or make a new one from a web page. They read JPG, PNG, WebP, HEIC/HEIF (iPhone), AVIF, GIF, BMP, TIFF and ICO, and save JPG, PNG, WebP or AVIF, or keep the original's format (HTML to Image saves PNG, JPG or WebP). Every tool saves a new file and never changes the original. See [The Tessera window](/docs/interface) for the Explorer, the Preview pane and the Saved card.
 
 - **Crop Image** works on one image. It shares the open image with Upscale Image, Remove background, Blur face and the Photo editor, so you can switch between them without opening it again.
 - **Rotate Image** works on a list. Add images with **Add images…** or by dragging them from the Explorer, and remove them with the × on each row or **Clear list**. It saves next to each image, or in a folder you choose.
+- **Photo collage** puts a list of photos together in one new picture.
 - **HTML to Image** makes a new picture from a web address, an HTML file or HTML code.
 
 ## Crop Image
@@ -80,6 +81,48 @@ Turns images by 90°, 180° or 270°, or mirrors them. Set each image on its own
 - Photos are shown upright first (the camera's rotation flag is applied), so turns are relative to what you see. The saved file is upright and has no rotation flag.
 - The camera details and the colour profile are kept.
 - Animated GIFs and multi-page TIFFs are saved as a single picture: only the first frame or page is kept.
+
+## Photo collage
+
+Puts several photos together on one canvas: in a grid, in a mosaic that keeps every photo whole, or with one photo large and the others beside it.
+
+### How to use it
+
+1. In the **Images** section, open the **Frame** tab and choose **Photo collage**.
+2. Add at least two photos: click **Add images…**, or drag them from the Explorer onto the list. You can also right-click an image in the Explorer and choose **Add to collage**.
+3. Put them in order with the ↑ and ↓ buttons on each row, or click **Shuffle the photos**. The order of the list is the order in the collage.
+4. Pick a layout: **Grid**, **Mosaic** or **Featured**, and adjust its options. The preview updates as you go.
+5. Set the spacing, border, corners and background, and the **Width**, **Format** and **Quality** under **Output**.
+6. Click **Save collage…** and choose a name and folder in the Save dialog.
+
+### Layouts
+
+| Layout | What it does |
+|---|---|
+| **Grid** | Rows and columns of equal cells. **Columns** is **Automatic** (the number that crops your photos least) or 1 to 8. If the last row has fewer photos, they share its full width. |
+| **Mosaic** | Rows of photos at their own shape, each row scaled to the full width, so nothing is cropped. **Photos per row** sets roughly how many fit in a row. The collage's height follows from the photos. |
+| **Featured** | The first photo in the list is large, on the **Left**, **Top**, **Right** or **Bottom**; the others share the rest in a grid. **Big photo** sets how much of the space it takes. |
+
+### Options
+
+| Option | What it does | Default |
+|---|---|---|
+| **Shape** | Square (1:1), Portrait (4:5), Landscape (3:2), Wide (16:9), Story (9:16), A4 portrait or A4 landscape. Not used by Mosaic. | Square |
+| **Fill (crop)** / **Whole photo** | Fill each cell, cropping what doesn't fit (from the centre), or show the whole photo with the background around it. Not used by Mosaic. | Fill |
+| **Spacing** | The gap between photos, as a share of the width. | 1% |
+| **Border** | The space around the edge, as a share of the width. | 2% |
+| **Rounded corners** | Rounds each photo's corners. | 0% |
+| **Background** | The colour behind the photos, or **Transparent**. | White |
+| **Width** | 1200, 2400, 3600 or 4800 pixels; the height follows from the shape (or, for Mosaic, from the photos). | 2400 px |
+| **Format**, **Quality** | JPG, PNG, WebP or AVIF; quality from 10 to 100 for JPG, WebP and AVIF. | JPG, 90 |
+
+### Good to know
+
+- The action bar shows the number of photos and the size of the file you'll get, in pixels.
+- **Transparent** needs a format that keeps transparency, so it switches JPG to PNG. With rounded corners on a transparent background, the corners are see-through too.
+- Photos are shown upright first (the camera's rotation flag is applied). The collage is saved without the photos' camera details or location.
+- The new file is named `collage` (then `collage (2)` and so on) and saved next to the first photo unless you choose another place. **Keep editing this file** opens it in the Photo editor, to add text, stickers or a filter.
+- Animated GIFs and multi-page TIFFs contribute their first frame or page.
 
 ## HTML to Image
 

@@ -29,6 +29,7 @@ from .services import convert, filesystem, frompdf, latex, preview, progress, sy
 from .services.editing import edit as ed_edit
 from .services.images import ai as img_ai
 from .services.images import basic as img_basic
+from .services.images import collage as img_collage
 from .services.images import editor as img_editor
 from .services.images import faces as img_faces
 from .services.images import imageio as img_io
@@ -461,6 +462,14 @@ class Api:
     @_records("Rotate Image")
     def image_rotate(self, items: list[dict], folder: str | None, options: dict, job_id: str = "") -> list[dict]:
         return img_basic.rotate(items, folder, options, progress.reporter(job_id))
+
+    def collage_preview(self, paths: list[str], options: dict, max_side: int = 1000) -> dict:
+        """A small render of the collage (exactly what Save makes), plus its full pixel size."""
+        return img_collage.preview(paths, options, int(max_side))
+
+    @_records("Photo collage")
+    def collage_save(self, paths: list[str], output: str, options: dict, job_id: str = "") -> dict:
+        return img_collage.save(paths, output, options, progress.reporter(job_id))
 
     @_records("HTML to Image")
     def html_to_image(self, kind: str, value: str, output: str, options: dict) -> dict:

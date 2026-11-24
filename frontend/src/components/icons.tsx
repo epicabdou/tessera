@@ -27,6 +27,15 @@ export const ChevronIcon = (p: IconProps) => (
   </Svg>
 )
 
+export const CollageIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="3" y="3" width="10" height="11" rx="1.5" />
+    <rect x="15" y="3" width="6" height="7" rx="1.5" />
+    <rect x="15" y="12" width="6" height="9" rx="1.5" />
+    <rect x="3" y="16" width="10" height="5" rx="1.5" />
+  </Svg>
+)
+
 export const FolderIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H9l2 2.2h7.5A2.5 2.5 0 0 1 21 9.7v7.8a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z" />

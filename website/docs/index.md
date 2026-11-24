@@ -76,7 +76,7 @@ The right-click menu offers these tools:
 | File | Menu entries |
 |---|---|
 | PDF | **Open in PDF tools**, **Add to Merge PDF**, **Edit PDF**, **Convert from PDF**, **Sign PDF**, **Protect PDF**, **Print…** |
-| Image (JPG, PNG, WebP, HEIC, HEIF, AVIF, GIF, BMP, TIFF, ICO) | **Edit photo**, **Compress image**, **Resize image**, **Crop image**, **Remove background**, **Upscale image**, and **Convert to PDF** for JPG, PNG, GIF, BMP, TIFF and WebP |
+| Image (JPG, PNG, WebP, HEIC, HEIF, AVIF, GIF, BMP, TIFF, ICO) | **Edit photo**, **Compress image**, **Resize image**, **Crop image**, **Add to collage**, **Remove background**, **Upscale image**, and **Convert to PDF** for JPG, PNG, GIF, BMP, TIFF and WebP |
 | Word, PowerPoint, Excel, CSV, HTML, Markdown | **Convert to PDF** (it picks the matching tool) |
 | `.tex` | **Open in LaTeX editor** |
 
@@ -115,7 +115,7 @@ Documents:
 Images:
 
 - [Format & size](/docs/img-optimize): Compress Image, Resize Image, Convert to JPG, Convert from JPG
-- [Crop, rotate & capture](/docs/img-layout): Crop Image, Rotate Image, HTML to Image
+- [Crop, rotate, collage & capture](/docs/img-layout): Crop Image, Rotate Image, Photo collage, HTML to Image
 - [AI enhancements](/docs/img-ai): Upscale Image, Remove background, Blur face
 - [Edit & brand](/docs/img-edit): Photo editor, Watermark Image
 

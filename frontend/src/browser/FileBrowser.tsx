@@ -205,6 +205,7 @@ export function FileBrowser({ selected, onSelect, onOpenInTool, filesVersion }: 
             { label: 'Compress image', onSelect: () => onOpenInTool('img-compress', entry.path) },
             { label: 'Resize image', onSelect: () => onOpenInTool('img-resize', entry.path) },
             { label: 'Crop image', onSelect: () => onOpenInTool('img-crop', entry.path) },
+            { label: 'Add to collage', onSelect: () => onOpenInTool('img-collage', entry.path) },
             { label: 'Remove background', onSelect: () => onOpenInTool('img-remove-bg', entry.path) },
             { label: 'Upscale image', onSelect: () => onOpenInTool('img-upscale', entry.path) },
             ...(convertTool ? [{ label: 'Convert to PDF', onSelect: () => onOpenInTool(convertTool, entry.path) }] : []),

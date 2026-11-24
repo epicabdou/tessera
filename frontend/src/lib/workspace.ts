@@ -37,6 +37,7 @@ export type ToolId =
   | 'img-from-jpg'
   | 'img-crop'
   | 'img-rotate'
+  | 'img-collage'
   | 'html-to-image'
   | 'img-upscale'
   | 'img-remove-bg'

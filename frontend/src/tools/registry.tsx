@@ -1,6 +1,7 @@
 import type { ComponentType, ReactNode } from 'react'
 import {
   BrushIcon,
+  CollageIcon,
   CompressIcon,
   ConvertIcon,
   CutoutIcon,
@@ -47,6 +48,7 @@ import { Watermark } from '../editing/Watermark'
 import '../editing/editing.css'
 import { BlurFaces, RemoveBackground, UpscaleImage } from '../images/AiTools'
 import { PhotoEditor, WatermarkImage } from '../images/EditTools'
+import { PhotoCollage } from '../images/CollageTool'
 import { CropImage, HtmlToImage, RotateImage } from '../images/FrameTools'
 import '../images/images.css'
 import { CompressImage, ConvertFromJpg, ConvertToJpg, ResizeImage } from '../images/OptimizeTools'
@@ -214,6 +216,7 @@ export const CATEGORIES: CategoryDef[] = [
     tools: [
       { id: 'img-crop', label: 'Crop Image', icon: <CropIcon size={15} />, component: CropImage, hint: 'Trim edges or frame an aspect ratio' },
       { id: 'img-rotate', label: 'Rotate Image', icon: <RotateCwIcon size={15} />, component: RotateImage, hint: 'Rotate or flip, one or many images' },
+      { id: 'img-collage', label: 'Photo collage', icon: <CollageIcon size={15} />, component: PhotoCollage, hint: 'Arrange photos in a grid, mosaic or featured layout' },
       { id: 'html-to-image', label: 'HTML to Image', icon: <GlobeIcon size={15} />, component: HtmlToImage, hint: 'Screenshot a web page or HTML/CSS' },
     ],
   },

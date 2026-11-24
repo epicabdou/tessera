@@ -551,3 +551,47 @@
     max-height: none;
   }
 }
+
+/* ---------- Photo collage ---------- */
+
+.collage-layouts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.collage-layout {
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px;
+  text-align: center;
+}
+
+.collage-layout svg {
+  width: 42px;
+  height: 31px;
+  margin-bottom: 4px;
+  fill: currentColor;
+  opacity: 0.55;
+}
+
+.collage-layout.is-on svg {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.collage-order {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.collage-badge {
+  margin-right: 4px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+}

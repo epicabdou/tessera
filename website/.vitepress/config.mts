@@ -64,7 +64,7 @@ export default defineConfig({
           text: 'Images',
           items: [
             { text: 'Format & size', link: '/docs/img-optimize' },
-            { text: 'Crop, rotate & capture', link: '/docs/img-layout' },
+            { text: 'Crop, rotate, collage & capture', link: '/docs/img-layout' },
             { text: 'AI enhancements', link: '/docs/img-ai' },
             { text: 'Edit & brand', link: '/docs/img-edit' },
           ],
