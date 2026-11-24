@@ -1,6 +1,6 @@
 [project]
 name = "tilepress"
-version = "0.2.0"
+version = "0.2.1"
 description = "Tilepress: PDF and image tools that run on your own computer. React UI, Python business logic, packaged with PyInstaller."
 requires-python = ">=3.11"
 license = "GPL-3.0-or-later"

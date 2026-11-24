@@ -17,4 +17,4 @@ LINKS = {
     "issues": "https://github.com/epicabdou/tilepress/issues",
     "license": "https://www.gnu.org/licenses/gpl-3.0.html",
 }
-__version__ = "0.2.0"
+__version__ = "0.2.1"
