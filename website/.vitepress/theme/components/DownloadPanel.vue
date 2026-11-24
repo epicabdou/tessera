@@ -17,7 +17,7 @@ const details = computed(() => {
       <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3 5.5 10 4.5v7H3zm8-1.15L21 3v8.5H11zM3 12.5h7v7l-7-1zm8 0h10V21l-10-1.4z" /></svg>
       <span>
         <strong>Download for Windows</strong>
-        <small>Tessera-x64.msi · installer</small>
+        <small>Tilepress-x64.msi · installer</small>
       </span>
     </a>
     <p class="dl-meta">{{ details }}</p>

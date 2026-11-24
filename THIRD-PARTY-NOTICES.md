@@ -1,6 +1,6 @@
 # Third-party notices
 
-Tessera is licensed under the GNU General Public License, version 3 or later (see [LICENSE](LICENSE)). The Windows app built from this repository (`scripts/build.py`, and the MSI made from it) includes the third-party components below, each under its own license. Some others are downloaded the first time a feature needs them, and some are only used to build the app.
+Tilepress is licensed under the GNU General Public License, version 3 or later (see [LICENSE](LICENSE)). The Windows app built from this repository (`scripts/build.py`, and the MSI made from it) includes the third-party components below, each under its own license. Some others are downloaded the first time a feature needs them, and some are only used to build the app.
 
 The license texts are in each project's repository and in its package (for Python packages, the `*.dist-info/licenses` folder of the installed wheel; for npm packages, the `LICENSE` file in `node_modules/<package>`). Licenses were read from the package metadata and license files of the versions installed from `requirements.txt` and `frontend/package.json` in November 2026. They can change between versions, so check again when you update a dependency (see [Keeping this file up to date](#keeping-this-file-up-to-date)).
 
@@ -10,7 +10,7 @@ The license texts are in each project's repository and in its package (for Pytho
 |---|---|---|
 | Python (CPython 3.13), the interpreter and standard library | PSF-2.0. The Windows build includes, among others, bzip2, libffi (MIT), OpenSSL 3 (Apache-2.0), SQLite (public domain), Expat, liblzma, zlib and mpdecimal; see Python's `LICENSE.txt` and the [license page](https://docs.python.org/3/license.html) for their terms. | <https://www.python.org/> |
 | Microsoft Visual C++ runtime and Universal C Runtime (`vcruntime140.dll`, `vcruntime140_1.dll`, `msvcp140.dll`, `msvcp140_1.dll`, `ucrtbase.dll`, `api-ms-win-*.dll`), shipped with Python and the packages below | Microsoft Distributable Code, redistributed under the "Additional Conditions for this Windows binary build" in Python's `LICENSE.txt` | <https://learn.microsoft.com/cpp/windows/latest-supported-vc-redist> |
-| PyInstaller bootloader and run-time modules (they start `Tessera.exe` and unpack the bundle) | GPL-2.0-or-later with the PyInstaller Bootloader Exception, which allows distributing the combined program under any license. PyInstaller's run-time hooks and run-time modules are Apache-2.0. | <https://pyinstaller.org/> |
+| PyInstaller bootloader and run-time modules (they start `Tilepress.exe` and unpack the bundle) | GPL-2.0-or-later with the PyInstaller Bootloader Exception, which allows distributing the combined program under any license. PyInstaller's run-time hooks and run-time modules are Apache-2.0. | <https://pyinstaller.org/> |
 | pyinstaller-hooks-contrib run-time hooks | Apache-2.0 (the rest of the package is GPL-2.0-or-later and isn't shipped) | <https://github.com/pyinstaller/pyinstaller-hooks-contrib> |
 
 ## Python packages bundled in the app
@@ -69,7 +69,7 @@ Everything in `requirements.txt`, plus the packages they depend on at run time.
 | XlsxWriter | BSD-2-Clause | <https://github.com/jmcnamara/XlsxWriter> |
 | yarl | Apache-2.0 | <https://github.com/aio-libs/yarl> |
 
-ONNX Runtime also installs **sympy** (BSD-3-Clause), **mpmath** (BSD-3-Clause), **flatbuffers** (Apache-2.0) and **protobuf** (BSD-3-Clause) as dependencies. Tessera doesn't import them, and PyInstaller leaves them out of the app.
+ONNX Runtime also installs **sympy** (BSD-3-Clause), **mpmath** (BSD-3-Clause), **flatbuffers** (Apache-2.0) and **protobuf** (BSD-3-Clause) as dependencies. Tilepress doesn't import them, and PyInstaller leaves them out of the app.
 
 ### Native libraries inside the packages
 
@@ -113,7 +113,7 @@ The UI uses fonts installed with Windows (Segoe UI, Segoe Script and others); no
 
 ## Downloaded on first use, not shipped
 
-These aren't part of the installer. Tessera downloads each one the first time a feature needs it, from a fixed address, and checks it against a SHA-256 checksum pinned in the code before using it (`backend/toolbox/services/components.py` and `backend/toolbox/services/images/ai.py`). They are stored under `%LOCALAPPDATA%\Tessera\`.
+These aren't part of the installer. Tilepress downloads each one the first time a feature needs it, from a fixed address, and checks it against a SHA-256 checksum pinned in the code before using it (`backend/toolbox/services/components.py` and `backend/toolbox/services/images/ai.py`). They are stored under `%LOCALAPPDATA%\Tilepress\`.
 
 | Component | Used by | License | Downloaded from | Project |
 |---|---|---|---|---|
@@ -124,7 +124,7 @@ These aren't part of the installer. Tessera downloads each one the first time a 
 
 ## Used if installed, not shipped
 
-Tessera can use these when they are on the PC, but never ships or downloads them: Microsoft Office (Word, Excel, PowerPoint) or LibreOffice for Office conversions, Tesseract OCR, and an installed MiKTeX or TeX Live. It also uses parts of Windows: the WebView2 Runtime, Windows OCR and the Windows face detector.
+Tilepress can use these when they are on the PC, but never ships or downloads them: Microsoft Office (Word, Excel, PowerPoint) or LibreOffice for Office conversions, Tesseract OCR, and an installed MiKTeX or TeX Live. It also uses parts of Windows: the WebView2 Runtime, Windows OCR and the Windows face detector.
 
 ## Used to build, not shipped
 
@@ -148,4 +148,4 @@ When you add, remove or update a dependency, check its license again and update 
 .venv\Scripts\python -c "import importlib.metadata as m; [print(d.metadata['Name'], d.version, d.metadata.get('License-Expression') or d.metadata.get('License') or [c for c in (d.metadata.get_all('Classifier') or []) if c.startswith('License')]) for d in m.distributions()]"
 ```
 
-For the frontend, read `license` in `frontend/node_modules/<package>/package.json`. To see which Python modules a build actually bundled, look in `build\Tessera\Analysis-00.toc` after running `scripts\build.py`.
+For the frontend, read `license` in `frontend/node_modules/<package>/package.json`. To see which Python modules a build actually bundled, look in `build\Tilepress\Analysis-00.toc` after running `scripts\build.py`.

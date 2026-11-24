@@ -5,7 +5,7 @@ description: The list of files your tools have made, where they came from and wh
 
 # History
 
-Tessera keeps a list of the files its tools make. Use it to find a file you saved last week, to see which file it was made from, or to check why a run failed. The history stays on your PC.
+Tilepress keeps a list of the files its tools make. Use it to find a file you saved last week, to see which file it was made from, or to check why a run failed. The history stays on your PC.
 
 ![The History panel open over Merge PDF, listing recent runs with their files](/screenshots/history.webp)
 
@@ -66,16 +66,16 @@ Both remove only the records. Your files stay where they are.
 
 ## Turning the history off
 
-Untick **Keep history** at the top of the panel. Tessera stops recording new runs, and the panel says "History is off: new runs aren't recorded." The entries you already have stay until you remove them. Tick the box again to resume.
+Untick **Keep history** at the top of the panel. Tilepress stops recording new runs, and the panel says "History is off: new runs aren't recorded." The entries you already have stay until you remove them. Tick the box again to resume.
 
-History is on when you first install Tessera. The choice is saved with your other settings.
+History is on when you first install Tilepress. The choice is saved with your other settings.
 
 ## Limits and storage
 
 - The newest 5,000 runs are kept. Older ones are removed as new ones arrive.
-- The history is a database file, `%LOCALAPPDATA%\Tessera\history.db`. While Tessera runs, two helper files sit next to it, `history.db-wal` and `history.db-shm`.
-- Two copies of Tessera can be open at the same time and both record into the same history.
-- A problem with the history never stops a tool. If the database can't be written, the tool still saves its file, and recording stops until you restart Tessera.
-- Uninstalling Tessera keeps the history. To get rid of it, clear it first, or delete the three `history.db` files while Tessera is closed.
+- The history is a database file, `%LOCALAPPDATA%\Tilepress\history.db`. While Tilepress runs, two helper files sit next to it, `history.db-wal` and `history.db-shm`.
+- Two copies of Tilepress can be open at the same time and both record into the same history.
+- A problem with the history never stops a tool. If the database can't be written, the tool still saves its file, and recording stops until you restart Tilepress.
+- Uninstalling Tilepress keeps the history. To get rid of it, clear it first, or delete the three `history.db` files while Tilepress is closed.
 
-See [Privacy](/docs/privacy) for everything else Tessera keeps on your PC.
+See [Privacy](/docs/privacy) for everything else Tilepress keeps on your PC.

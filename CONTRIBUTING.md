@@ -1,15 +1,15 @@
-# Contributing to Tessera
+# Contributing to Tilepress
 
-Thanks for helping. Tessera is a Windows desktop app: a React + TypeScript UI (`frontend/`) over Python business logic (`backend/`), bundled with PyInstaller and shipped as an MSI. The user guide lives at **<https://epicabdou.github.io/tessera/>** (sources in `website/`).
+Thanks for helping. Tilepress is a Windows desktop app: a React + TypeScript UI (`frontend/`) over Python business logic (`backend/`), bundled with PyInstaller and shipped as an MSI. The user guide lives at **<https://epicabdou.github.io/tilepress/>** (sources in `website/`).
 
 By taking part you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Reporting bugs and proposing features
 
-- **Bugs:** open an issue with the **Bug report** form. Include the Tessera version (click the status button, the green dot in the top bar, to open the About box), your Windows version, the tool you used, the steps, and the relevant part of the log at `%LOCALAPPDATA%\Tessera\toolbox.log`. A small sample file that shows the problem helps a lot; remove anything private from it first.
+- **Bugs:** open an issue with the **Bug report** form. Include the Tilepress version (click the status button, the green dot in the top bar, to open the About box), your Windows version, the tool you used, the steps, and the relevant part of the log at `%LOCALAPPDATA%\Tilepress\toolbox.log`. A small sample file that shows the problem helps a lot; remove anything private from it first.
 - **Features:** open an issue with the **Feature request** form. Describe the task you're trying to get done before the solution you have in mind.
 - **Security problems:** don't open a public issue. Follow [SECURITY.md](SECURITY.md).
-- **Questions about using the app:** read the [docs](https://epicabdou.github.io/tessera/) and the [support page](https://epicabdou.github.io/tessera/support) first.
+- **Questions about using the app:** read the [docs](https://epicabdou.github.io/tilepress/) and the [support page](https://epicabdou.github.io/tilepress/support) first.
 
 Search the existing issues before opening a new one. For anything bigger than a small fix, open an issue (or comment on one) before you start, so we can agree on the approach first.
 
@@ -56,29 +56,29 @@ The tests cover the business logic in `backend/toolbox/services`. Two groups are
 - The image AI tests use stand-in models by default. To also run the real models, point `TOOLBOX_AI_MODELS` at a models folder, such as the app's own:
 
   ```powershell
-  $env:TOOLBOX_AI_MODELS = "$env:LOCALAPPDATA\Tessera\models"; .venv\Scripts\python -m pytest backend/tests/test_images.py
+  $env:TOOLBOX_AI_MODELS = "$env:LOCALAPPDATA\Tilepress\models"; .venv\Scripts\python -m pytest backend/tests/test_images.py
   ```
 
 The self-test checks the whole stack: PDF rendering, the UI-to-Python bridge, conversions, and the PDF and image tools. It exits with `0` (pass) or `1` (fail), and works from source, from `scripts\dev.py` and on packaged builds:
 
 ```powershell
-dist\Tessera\Tessera.exe --self-test
+dist\Tilepress\Tilepress.exe --self-test
 ```
 
 ## Build
 
 ```powershell
-.venv\Scripts\python scripts\build.py            # folder build: dist\Tessera\Tessera.exe (starts fastest)
-.venv\Scripts\python scripts\build.py --onefile  # single file:  dist\Tessera.exe (slower to start)
-.venv\Scripts\python scripts\build.py --msi      # installer:    dist\Tessera-<version>-x64.msi
+.venv\Scripts\python scripts\build.py            # folder build: dist\Tilepress\Tilepress.exe (starts fastest)
+.venv\Scripts\python scripts\build.py --onefile  # single file:  dist\Tilepress.exe (slower to start)
+.venv\Scripts\python scripts\build.py --msi      # installer:    dist\Tilepress-<version>-x64.msi
 ```
 
-`--skip-frontend` reuses the existing `frontend/dist`. With `--msi`, `--skip-app` repacks the existing `dist\Tessera` without rebuilding it.
+`--skip-frontend` reuses the existing `frontend/dist`. With `--msi`, `--skip-app` repacks the existing `dist\Tilepress` without rebuilding it.
 
 About the installer:
 
 - `--msi` restores WiX Toolset 5.0.2, pinned in `dotnet-tools.json`, and runs Windows Installer's consistency checks on the result. The project stays on WiX 5 because WiX 6 and later need a separate EULA.
-- The sources are `installer\Tessera.wxs` (package, files, shortcut) and `installer\TesseraUI.wxs` (dialogs). Never change the `UpgradeCode` in `Tessera.wxs`: upgrades depend on it.
+- The sources are `installer\Tilepress.wxs` (package, files, shortcut) and `installer\TilepressUI.wxs` (dialogs). Never change the `UpgradeCode` in `Tilepress.wxs`: upgrades depend on it.
 - The version comes from `__version__` in `backend/toolbox/__init__.py`. A newer MSI replaces the installed version; an older one refuses to install over it.
 - The icon (`assets\icon.ico`), the logo and the installer artwork (`assets\installer\`) are generated: edit `scripts\make_brand.py` and run it rather than editing the files.
 
@@ -99,7 +99,7 @@ The project layout is described in [README.md](README.md#project-layout).
 
 - Files stay on the user's PC. Don't add telemetry or uploads. New downloads happen only when a feature first needs them, from a fixed HTTPS address with a SHA-256 checksum pinned in the code, the way `services/components.py` (Tectonic) and `services/images/ai.py` (models) do it.
 - Tools never overwrite their input. They save a new file, suggest a name like `name_rotated.pdf`, and ask before replacing an existing file.
-- The product is called Tessera, but the Python package and internal identifiers (`toolbox`, `TOOLBOX_*` variables, storage keys, drag-and-drop types) keep the old name on purpose. Renaming them would break saved state.
+- The product is called Tilepress, but the Python package and internal identifiers (`toolbox`, `TOOLBOX_*` variables, storage keys, drag-and-drop types) keep the old name on purpose. Renaming them would break saved state.
 - New dependencies need a license compatible with GPL-3.0 (permissive licenses are preferred). Say why you need it in the pull request, and add it to [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 - When behaviour changes, update the user guide in `website/docs/` and, for developer-facing changes, `README.md`.
 
@@ -145,7 +145,7 @@ npm run build
 
 Preview the site while you write with `npm run dev` in `website/` (it serves on port 5174).
 
-If you changed packaging (dependencies, `scripts/build.py`, `installer/`, data files a library needs at runtime), also build the app and run `dist\Tessera\Tessera.exe --self-test`.
+If you changed packaging (dependencies, `scripts/build.py`, `installer/`, data files a library needs at runtime), also build the app and run `dist\Tilepress\Tilepress.exe --self-test`.
 
 ## Releases
 
@@ -153,4 +153,4 @@ Maintainers publish a release by bumping `__version__` in `backend/toolbox/__ini
 
 ## License
 
-Tessera is licensed under the GNU General Public License, version 3 or (at your option) any later version (GPL-3.0-or-later); see [LICENSE](LICENSE). There's no contributor license agreement: by submitting a contribution, you agree that it's licensed under the same terms, and you confirm that you have the right to submit it.
+Tilepress is licensed under the GNU General Public License, version 3 or (at your option) any later version (GPL-3.0-or-later); see [LICENSE](LICENSE). There's no contributor license agreement: by submitting a contribution, you agree that it's licensed under the same terms, and you confirm that you have the right to submit it.

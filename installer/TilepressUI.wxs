@@ -2,14 +2,14 @@
 <!--
   Installer dialogs: WiX's WixUI_Minimal without the licence page.
 
-  First install:  Welcome -> Ready to install -> progress -> Finish ("Launch Tessera", ticked)
+  First install:  Welcome -> Ready to install -> progress -> Finish ("Launch Tilepress", ticked)
   Installed:      Change/Repair/Remove (Change is hidden: there are no optional features)
 
   Based on src/ext/UI/wixlib/WixUI_Minimal.wxs from WiX 5.0.2 (MS-RL).
 -->
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Fragment>
-    <UI Id="TesseraUI">
+    <UI Id="TilepressUI">
       <TextStyle Id="WixUI_Font_Normal" FaceName="Segoe UI" Size="9" />
       <TextStyle Id="WixUI_Font_Bigger" FaceName="Segoe UI" Size="12" />
       <TextStyle Id="WixUI_Font_Title" FaceName="Segoe UI" Size="9" Bold="yes" />

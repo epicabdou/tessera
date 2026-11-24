@@ -7,7 +7,7 @@ description: Change text and add objects to PDF pages, redact, make scans search
 
 These tools change what is on a PDF's pages: retype text, add pictures and shapes, black out confidential text, add a searchable text layer to scans, fill in or create form fields, and stamp a watermark. In the app this category is the **Edit & Forms** tab under **Documents**.
 
-All four tools work on one open PDF, the same one the page tools use, so a file you opened in Split PDF or Rotate PDF is already open here. To open a PDF, drag it from the Explorer onto the tool, click **Open PDF…**, or click **Use** followed by the name of the PDF selected in the Explorer. Right-clicking a PDF in the Explorer and choosing **Edit PDF** opens it straight in Edit PDF. See [The Tessera window](/docs/interface) for the Explorer and the other general controls.
+All four tools work on one open PDF, the same one the page tools use, so a file you opened in Split PDF or Rotate PDF is already open here. To open a PDF, drag it from the Explorer onto the tool, click **Open PDF…**, or click **Use** followed by the name of the PDF selected in the Explorer. Right-clicking a PDF in the Explorer and choosing **Edit PDF** opens it straight in Edit PDF. See [The Tilepress window](/docs/interface) for the Explorer and the other general controls.
 
 Every tool saves a **new** file and leaves the original alone. When it's done, a **Saved** card lists the result with **Open**, **Show in folder** and **Keep editing this file**, which opens the result in the same tool for the next step. Each run is also listed in the [History](/docs/history).
 
@@ -42,7 +42,7 @@ To remove an object, select it and press <kbd>Delete</kbd> (or <kbd>Backspace</k
 
 ### Editing existing text
 
-When you click a line with **Edit text**, Tessera puts two objects on the page:
+When you click a line with **Edit text**, Tilepress puts two objects on the page:
 
 - a white-out box over the old line, set to also remove the old text from the file, and
 - a new text box with the same words, at the same size, in bold if the line was bold, and in the closest of the three fonts (Arial, Times New Roman or Courier New).
@@ -71,11 +71,11 @@ Under the settings you see the object's position and size in points.
 - Text doesn't wrap inside its box. Start a new line with <kbd>Enter</kbd>.
 - Text is written with Arial, Times New Roman or Courier New taken from Windows and embedded in the PDF, so accented and non-Latin letters work. If a font file is missing, a standard PDF font is used instead, which only covers Latin letters.
 - **Edit text** works on ordinary text PDFs. A scan has no text to find, so run [OCR PDF](#ocr-pdf) on it first. The replacement text is always black at first; change **Colour** if the original was coloured.
-- Tessera finds a "line" by grouping words at the same height. On a page with two columns, one line can run across both.
+- Tilepress finds a "line" by grouping words at the same height. On a page with two columns, one line can run across both.
 - White-out only hides what is underneath unless you tick **Also remove the text underneath**. Hidden text can still be selected, copied and searched.
 
 ::: warning What Redact removes
-**Redact** draws a black box and deletes the text underneath, so it can't be copied or searched. A PDF stores text in pieces (a letter, a word or a whole line, depending on the program that made it). Tessera deletes every piece that **starts** inside the box, so:
+**Redact** draws a black box and deletes the text underneath, so it can't be copied or searched. A PDF stores text in pieces (a letter, a word or a whole line, depending on the program that made it). Tilepress deletes every piece that **starts** inside the box, so:
 
 - make the box cover the start of everything you want gone, and
 - a piece that starts inside the box is deleted whole, even the part that sticks out.
@@ -90,7 +90,7 @@ OCR PDF recognises the text in scanned pages and adds it as an invisible layer, 
 ### How to use it
 
 1. Open **OCR PDF** and open a scanned PDF.
-2. Check **Engine** and **Document language**. Tessera picks them for you (see below).
+2. Check **Engine** and **Document language**. Tilepress picks them for you (see below).
 3. If you only want some pages, type them in **Pages**.
 4. Click **Make searchable…**, choose a name and folder, and click **Save**.
 
@@ -109,8 +109,8 @@ A progress bar shows which page is being recognised. When it's done, a line unde
 ### Good to know
 
 - The file is suggested as `name_ocr.pdf` next to the original.
-- Tessera needs one OCR engine:
-  - **Tesseract**, if it's installed. Tessera looks for `tesseract.exe` on the `PATH` and in a `Tesseract-OCR` folder under Program Files, Program Files (x86) or your local app data folder. It offers every language Tesseract has data for.
+- Tilepress needs one OCR engine:
+  - **Tesseract**, if it's installed. Tilepress looks for `tesseract.exe` on the `PATH` and in a `Tesseract-OCR` folder under Program Files, Program Files (x86) or your local app data folder. It offers every language Tesseract has data for.
   - **Windows OCR**, which comes with Windows 10 and 11. It offers the languages installed in **Settings → Time & language → Language** that include "Optical character recognition". These appear as language tags, such as `en-US`.
 - If neither is available, the tool says so and the button stays greyed out.
 - Pick the language of the document. Recognising French text with English, for example, gives poor results.

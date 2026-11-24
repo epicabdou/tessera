@@ -28,6 +28,20 @@ def test_moves_data_from_old_name(monkeypatch, tmp_path):
     assert (path / "models" / "x.onnx").read_bytes() == b"model"
 
 
+def test_moves_data_from_tessera_before_toolbox(monkeypatch, tmp_path):
+    root = _local(monkeypatch, tmp_path)
+    for name, pins in (("Tessera", "tessera"), ("Toolbox", "toolbox")):
+        (root / name).mkdir()
+        (root / name / "settings.json").write_text(pins, encoding="utf-8")
+
+    path = user_data_dir()
+
+    assert path == root / APP_NAME
+    assert not (root / "Tessera").exists()
+    assert (path / "settings.json").read_text(encoding="utf-8") == "tessera"
+    assert (root / "Toolbox" / "settings.json").read_text(encoding="utf-8") == "toolbox"
+
+
 def test_leaves_unrelated_toolbox_folder_alone(monkeypatch, tmp_path):
     root = _local(monkeypatch, tmp_path)
     other = root / "Toolbox"

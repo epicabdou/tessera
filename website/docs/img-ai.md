@@ -7,7 +7,7 @@ description: Upscale pictures with AI, remove or replace backgrounds, and find a
 
 These tools are under the **AI** tab in the **Images** section. Upscale Image and Remove background run AI models on your computer, and Blur face uses the face detector built into Windows. Your pictures are never uploaded.
 
-All three work on one image at a time. They share the open image with Crop Image and the Photo editor, so a picture you open in one is open in the others. To open an image, drag it from the Explorer onto the tool, click **Open image…**, or select it in the Explorer and click the **Use** button with its name. Right-clicking an image in the Explorer also offers **Upscale image** and **Remove background**. See [The Tessera window](/docs/interface) for the Explorer and the other general controls.
+All three work on one image at a time. They share the open image with Crop Image and the Photo editor, so a picture you open in one is open in the others. To open an image, drag it from the Explorer onto the tool, click **Open image…**, or select it in the Explorer and click the **Use** button with its name. Right-clicking an image in the Explorer also offers **Upscale image** and **Remove background**. See [The Tilepress window](/docs/interface) for the Explorer and the other general controls.
 
 Each tool saves a new file and never changes the original. After saving, the **Saved** card offers **Open**, **Show in folder** and **Keep editing this file**, which opens the saved copy in the tool.
 
@@ -81,7 +81,7 @@ Remove background finds the subject of a picture with ISNet, an AI segmentation 
 
 - **Inputs:** JPG, PNG, WebP, HEIC/HEIF, AVIF, GIF, BMP, TIFF and ICO.
 - **File name:** the suggested name is the original name plus `_no_bg`, next to the original, for example `portrait_no_bg.png`.
-- The model runs once per picture. Changing the options afterwards reuses its result, so it's instant. While the app is open, Tessera remembers the result for the last few pictures. If the file changes, the model runs again.
+- The model runs once per picture. Changing the options afterwards reuses its result, so it's instant. While the app is open, Tilepress remembers the result for the last few pictures. If the file changes, the model runs again.
 - The model looks at the whole picture at once (at 1024 × 1024 pixels). The saved file is full size.
 - Areas that were already transparent in the original stay transparent.
 - The quality for JPG, WebP and AVIF is fixed at 92.
@@ -95,7 +95,7 @@ Blur face finds the faces in a photo and blurs, pixelates or covers them, for ex
 
 ### How to use it
 
-1. Open a photo. Tessera looks for faces straight away ("Looking for faces…") and puts a box on each face it finds. The picture shows the real result.
+1. Open a photo. Tilepress looks for faces straight away ("Looking for faces…") and puts a box on each face it finds. The picture shows the real result.
 2. Check the boxes. Click a box to select it, then drag it to move it, or drag its handles to resize it. To remove the selected box, click **Remove selected** or press <kbd>Delete</kbd>.
 3. To hide something it missed, click **+ Add a box**, then drag over the area on the photo. A single click adds a square box centred where you click.
 4. Under **Effect**, choose **Blur**, **Pixelate** or **Cover**, and adjust the options.

@@ -5,7 +5,7 @@ description: Crop an image to a box, circle or aspect ratio, rotate or flip many
 
 # Crop, rotate, collage & capture
 
-These tools change the frame of a picture, or make a new one from a web page. They read JPG, PNG, WebP, HEIC/HEIF (iPhone), AVIF, GIF, BMP, TIFF and ICO, and save JPG, PNG, WebP or AVIF, or keep the original's format (HTML to Image saves PNG, JPG or WebP). Every tool saves a new file and never changes the original. See [The Tessera window](/docs/interface) for the Explorer, the Preview pane and the Saved card.
+These tools change the frame of a picture, or make a new one from a web page. They read JPG, PNG, WebP, HEIC/HEIF (iPhone), AVIF, GIF, BMP, TIFF and ICO, and save JPG, PNG, WebP or AVIF, or keep the original's format (HTML to Image saves PNG, JPG or WebP). Every tool saves a new file and never changes the original. See [The Tilepress window](/docs/interface) for the Explorer, the Preview pane and the Saved card.
 
 - **Crop Image** works on one image. It shares the open image with Upscale Image, Remove background, Blur face and the Photo editor, so you can switch between them without opening it again.
 - **Rotate Image** works on a list. Add images with **Add images…** or by dragging them from the Explorer, and remove them with the × on each row or **Clear list**. It saves next to each image, or in a folder you choose.
@@ -155,9 +155,9 @@ Renders a web page, an HTML file or a snippet of HTML and CSS into a PNG, JPG or
 
 ### Good to know
 
-- Only `http://` and `https://` addresses work. If you leave out the start, Tessera adds `https://`.
-- The page is rendered by WebView2, the engine that also draws Tessera, in a window kept off-screen, out of sight and out of the taskbar. The page runs as it would in a browser, scripts included. Only one page is rendered at a time.
-- Tessera waits up to 60 seconds for the page to load, then up to 15 seconds more for its fonts and images. For **The whole page**, it also scrolls through the page first so lazy-loaded pictures appear, then goes back to the top.
+- Only `http://` and `https://` addresses work. If you leave out the start, Tilepress adds `https://`.
+- The page is rendered by WebView2, the engine that also draws Tilepress, in a window kept off-screen, out of sight and out of the taskbar. The page runs as it would in a browser, scripts included. Only one page is rendered at a time.
+- Tilepress waits up to 60 seconds for the page to load, then up to 15 seconds more for its fonts and images. For **The whole page**, it also scrolls through the page first so lazy-loaded pictures appear, then goes back to the top.
 - Widths under 600 px are rendered as on a phone.
 - Scroll bars are hidden in the picture.
 - **The whole page** is captured up to 16,000 pixels tall (before **Sharpness** is applied). A longer page is cut off at that point.

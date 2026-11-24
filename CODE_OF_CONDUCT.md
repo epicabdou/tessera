@@ -2,7 +2,7 @@
 
 ## Our commitment
 
-We want Tessera to be a welcoming project for everyone who uses it or works on it, whatever their age, body, ability, ethnicity, gender identity or expression, level of experience, education, background, nationality, appearance, race, religion, or sexual orientation. We commit to acting in ways that keep this community open, friendly, diverse and healthy.
+We want Tilepress to be a welcoming project for everyone who uses it or works on it, whatever their age, body, ability, ethnicity, gender identity or expression, level of experience, education, background, nationality, appearance, race, religion, or sexual orientation. We commit to acting in ways that keep this community open, friendly, diverse and healthy.
 
 ## What we expect
 

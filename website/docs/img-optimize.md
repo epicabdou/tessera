@@ -13,7 +13,7 @@ In all four tools:
 - Choose **Save next to each image** (the default) or **Save in a folder** and pick the folder with **Choose…**.
 - While the tool works, a progress bar shows which file it's on. When it's done, the **Saved** card lists the new files with **Open** and **Show in folder**, and each row shows its result.
 
-See [The Tessera window](/docs/interface) for the Explorer, the Preview pane and the Saved card.
+See [The Tilepress window](/docs/interface) for the Explorer, the Preview pane and the Saved card.
 
 ## Compress Image
 
@@ -41,9 +41,9 @@ Makes images smaller for the web, email or storage. Before you save, it compress
 
 ### Good to know
 
-- New files are named after the original with `_compressed` added, for example `holiday_compressed.jpg`. If that name is taken, Tessera adds a number: `holiday_compressed (2).jpg`.
-- **Same as the original** keeps each file's format, except HEIC/HEIF photos, which become JPG, and ICO files, which become PNG. Tessera doesn't write those two formats.
-- If an image can't get any smaller in its own format and at its own pixel size, Tessera copies the original file instead of writing a bigger one. Its row then says **Kept original**, and the estimate says "(already small)". If you change the format or use **Limit the size**, the new file is always written, even if it ends up bigger.
+- New files are named after the original with `_compressed` added, for example `holiday_compressed.jpg`. If that name is taken, Tilepress adds a number: `holiday_compressed (2).jpg`.
+- **Same as the original** keeps each file's format, except HEIC/HEIF photos, which become JPG, and ICO files, which become PNG. Tilepress doesn't write those two formats.
+- If an image can't get any smaller in its own format and at its own pixel size, Tilepress copies the original file instead of writing a bigger one. Its row then says **Kept original**, and the estimate says "(already small)". If you change the format or use **Limit the size**, the new file is always written, even if it ends up bigger.
 - The sizes are measured, not guessed: each image is compressed in memory with your settings. This is done for the first 60 images in the list, one after another, and starts again shortly after you change a setting.
 - With **Keep metadata** off, the colour profile goes too, not just the camera and location details.
 - Animated GIFs and multi-page TIFFs are compressed as a single picture: only the first frame or page is kept.
@@ -80,7 +80,7 @@ Scales images by a percentage, to exact pixels, or so the longest side fits a si
 
 - New files are named after the original with `_resized` added, for example `holiday_resized.jpg`.
 - An image that **Never enlarge** leaves at its size is still saved as a new `_resized` file.
-- The result can't be larger than 200 megapixels. Above that, Tessera asks you to choose a smaller size.
+- The result can't be larger than 200 megapixels. Above that, Tilepress asks you to choose a smaller size.
 - The camera details and the colour profile are kept.
 - When an image with transparency is saved as JPG, the transparent areas become white.
 - Animated GIFs and multi-page TIFFs are resized as a single picture: only the first frame or page is kept.
@@ -109,7 +109,7 @@ Turns PNG, WebP, HEIC (iPhone), AVIF, GIF, BMP, TIFF and ICO images into JPG. Tr
 
 ### Good to know
 
-- New files keep the original's name with a `.jpg` extension: `logo.png` becomes `logo.jpg`. If that name is taken, Tessera adds a number: `logo (2).jpg`.
+- New files keep the original's name with a `.jpg` extension: `logo.png` becomes `logo.jpg`. If that name is taken, Tilepress adds a number: `logo (2).jpg`.
 - With **Every page / frame as its own JPG**, the files are numbered: `scan_1.jpg`, `scan_2.jpg` and so on.
 - After converting, each row shows the name of the file it was saved as.
 

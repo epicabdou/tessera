@@ -5,9 +5,9 @@ description: Turn Word, PowerPoint and Excel files, images, web pages, HTML and 
 
 # Convert to PDF
 
-These tools turn other kinds of files into PDFs: Office documents, images, web pages and HTML, and Markdown. You can add a file with the tool's own buttons, drag it in from the Explorer, right-click it in the Explorer and choose **Convert to PDF**, or select it and use the **Convert to PDF** button in the Preview panel. Each of these opens the right tool for the file type. See [The Tessera window](/docs/interface) for the controls all tools share.
+These tools turn other kinds of files into PDFs: Office documents, images, web pages and HTML, and Markdown. You can add a file with the tool's own buttons, drag it in from the Explorer, right-click it in the Explorer and choose **Convert to PDF**, or select it and use the **Convert to PDF** button in the Preview panel. Each of these opens the right tool for the file type. See [The Tilepress window](/docs/interface) for the controls all tools share.
 
-Tessera never overwrites a file without asking. When a tool saves next to the original or in a folder you chose, and a file with that name already exists, it adds a number, for example `report (2).pdf`. When a tool shows a Save dialog, Windows asks before replacing a file. Every conversion is listed in [History](/docs/history).
+Tilepress never overwrites a file without asking. When a tool saves next to the original or in a folder you chose, and a file with that name already exists, it adds a number, for example `report (2).pdf`. When a tool shows a Save dialog, Windows asks before replacing a file. Every conversion is listed in [History](/docs/history).
 
 ## Word to PDF
 
@@ -107,10 +107,10 @@ Converts spreadsheets to PDF using Microsoft Excel or LibreOffice. You can expor
 
 These points apply to Word to PDF, PowerPoint to PDF and Excel to PDF.
 
-- **You need Microsoft Office or LibreOffice.** Tessera checks for each Office app separately (Word, Excel, PowerPoint), so you can have one and not the others. It finds LibreOffice on your `PATH` or in `Program Files\LibreOffice`.
+- **You need Microsoft Office or LibreOffice.** Tilepress checks for each Office app separately (Word, Excel, PowerPoint), so you can have one and not the others. It finds LibreOffice on your `PATH` or in `Program Files\LibreOffice`.
 - **Which one is used.** Microsoft Office is used when it's installed, because its output is closest to the original. Otherwise LibreOffice is used. If both are installed, you can switch in the list under the title.
-- **If neither is installed**, the tool shows a message and the convert button stays disabled. After installing one, click **Check again** in that message; you don't need to restart Tessera.
-- **Your documents are safe.** Files are opened read-only, and macros are turned off before a file is opened. Office runs invisibly as its own copy, so documents you have open aren't touched, and Tessera only closes the copy it started. LibreOffice runs with a separate, temporary profile, so it works even while you have LibreOffice open.
+- **If neither is installed**, the tool shows a message and the convert button stays disabled. After installing one, click **Check again** in that message; you don't need to restart Tilepress.
+- **Your documents are safe.** Files are opened read-only, and macros are turned off before a file is opened. Office runs invisibly as its own copy, so documents you have open aren't touched, and Tilepress only closes the copy it started. LibreOffice runs with a separate, temporary profile, so it works even while you have LibreOffice open.
 - **One at a time.** Files convert one after another. If you click the button again, files that already converted are skipped, and files that failed are tried again.
 - **Password-protected** Word and Excel files fail with an error instead of asking for the password.
 - **Time limit.** LibreOffice gets 5 minutes per file and is stopped after that.
@@ -153,7 +153,7 @@ When it's done, a **Saved** card appears with **Open** and **Show in folder**. F
 
 ## HTML to PDF
 
-Prints a web page, an HTML file or HTML code that you paste or type to a PDF. It uses WebView2, the Chromium engine that also draws the Tessera window.
+Prints a web page, an HTML file or HTML code that you paste or type to a PDF. It uses WebView2, the Chromium engine that also draws the Tilepress window.
 
 ### How to use it
 
@@ -184,7 +184,7 @@ When it's done, a **Saved** card appears with **Open**, **Show in folder** and *
 
 - **Web addresses:** if you leave out `https://`, it's added. Only `http://` and `https://` addresses work.
 - **Logins:** the page loads in a hidden window, so a site that needs you to sign in prints as it looks to a signed-out visitor.
-- **Waiting for the page:** Tessera waits up to 60 seconds for the page to load, then up to 15 more seconds for its fonts and images. If the page can't load, you see "The page couldn't be loaded. Check the address and your internet connection."
+- **Waiting for the page:** Tilepress waits up to 60 seconds for the page to load, then up to 15 more seconds for its fonts and images. If the page can't load, you see "The page couldn't be loaded. Check the address and your internet connection."
 - **Files:** accepts `.html`, `.htm` and `.xhtml` files.
 - **Pasted code:** you can paste a whole document or just a fragment; a fragment is wrapped in a page for you. Styles in `<style>` tags are kept. The preview beside the box doesn't run scripts, but the PDF is made from the full page. Links to local files by relative path don't work for pasted code, because it's printed from a temporary copy.
 - **Header and footer:** for a web page or an HTML file, the footer shows the page's address. For pasted code, the header shows the PDF's file name instead of a temporary path.

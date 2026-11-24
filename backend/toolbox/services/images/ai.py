@@ -2,7 +2,7 @@
 ONNX Runtime (DirectML on the GPU when available, otherwise the CPU).
 
 Models are downloaded the first time a tool needs them, checked against a SHA-256
-checksum, and kept in %LOCALAPPDATA%\\Tessera\\models. Nothing is sent anywhere.
+checksum, and kept in %LOCALAPPDATA%\\Tilepress\\models. Nothing is sent anywhere.
 """
 
 from __future__ import annotations

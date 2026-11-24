@@ -70,7 +70,7 @@ def to_word(path: str, output: str, engine: str = "auto", fmt: str = "docx", pro
             # Word opens a private copy: if a run is ever cut short, Word remembers that path as
             # one that "caused a serious error" and asks about it next time, which would block
             # every later conversion of the user's file.
-            work_dir = Path(tempfile.mkdtemp(prefix="tessera-word-"))
+            work_dir = Path(tempfile.mkdtemp(prefix="tilepress-word-"))
             copy = work_dir / Path(path).name
             if reader.is_encrypted:
                 # Opens without a password but restricts editing: Word refuses those ("it may be

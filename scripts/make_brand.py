@@ -1,4 +1,4 @@
-"""Generate the Tessera logo files from one definition.
+"""Generate the Tilepress logo files from one definition.
 
     .venv\\Scripts\\python scripts\\make_brand.py
 
@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 # --- the design, on a 32-unit canvas ----------------------------------------------------
 
-APP_WORDMARK = "Tessera"
+APP_WORDMARK = "Tilepress"
 UNIT = 32
 RADIUS = 8  # corner radius of the app tile
 # Violet -> blue -> cyan, top-left to bottom-right: the same stops as --accent-grad in frontend/src/index.css.

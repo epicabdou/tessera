@@ -7,7 +7,7 @@ description: Adjust and decorate a photo in the Photo editor, and stamp text or 
 
 These tools are under the **Edit & Brand** tab in the **Images** section. The Photo editor works on one picture at a time: light and colour, looks, rotation, and layers of text, drawings, shapes and logos. Watermark Image stamps text or a logo on a whole batch of images.
 
-Both tools save new files and never change the originals. The Photo editor's adjustments and the watermark preview are drawn by the same code that saves, so they show what you'll get. To open a picture in the Photo editor, right-click it in the Explorer and choose **Edit photo**, or click **Edit photo** in the Preview panel. See [The Tessera window](/docs/interface) for the Explorer and the other general controls.
+Both tools save new files and never change the originals. The Photo editor's adjustments and the watermark preview are drawn by the same code that saves, so they show what you'll get. To open a picture in the Photo editor, right-click it in the Explorer and choose **Edit photo**, or click **Edit photo** in the Preview panel. See [The Tilepress window](/docs/interface) for the Explorer and the other general controls.
 
 ## Photo editor
 

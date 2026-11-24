@@ -38,7 +38,7 @@ jobs:
             exit 1
           }
           Add-Content -Path $env:GITHUB_OUTPUT -Value "version=$appVersion"
-          Write-Output "Releasing Tessera $appVersion"
+          Write-Output "Releasing Tilepress $appVersion"
 
       - uses: actions/setup-python@v7
         with:
@@ -63,12 +63,12 @@ jobs:
         shell: pwsh
         timeout-minutes: 10
         run: |
-          # Tessera.exe is a GUI program: Start-Process -Wait -PassThru is what gives us its exit code.
-          $app = Start-Process -FilePath "dist\Tessera\Tessera.exe" -ArgumentList "--self-test" -Wait -PassThru
+          # Tilepress.exe is a GUI program: Start-Process -Wait -PassThru is what gives us its exit code.
+          $app = Start-Process -FilePath "dist\Tilepress\Tilepress.exe" -ArgumentList "--self-test" -Wait -PassThru
           if ($app.ExitCode -ne 0) {
-            $log = Join-Path $env:LOCALAPPDATA "Tessera\toolbox.log"
+            $log = Join-Path $env:LOCALAPPDATA "Tilepress\toolbox.log"
             if (Test-Path $log) { Get-Content $log -Tail 200 }
-            Write-Output "::error::Tessera.exe --self-test failed with exit code $($app.ExitCode)"
+            Write-Output "::error::Tilepress.exe --self-test failed with exit code $($app.ExitCode)"
             exit 1
           }
           Write-Output "Self-test passed"
@@ -78,9 +78,9 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          $versioned = "Tessera-$env:VERSION-x64.msi"
-          # The website links to releases/latest/download/Tessera-x64.msi: never rename this asset.
-          $latest = "Tessera-x64.msi"
+          $versioned = "Tilepress-$env:VERSION-x64.msi"
+          # The website links to releases/latest/download/Tilepress-x64.msi: never rename this asset.
+          $latest = "Tilepress-x64.msi"
           Set-Location dist
           if (-not (Test-Path $versioned)) {
             Write-Output "::error::dist\$versioned wasn't built"
@@ -103,8 +103,8 @@ jobs:
           gh release create $env:TAG `
             --repo $env:GITHUB_REPOSITORY `
             --verify-tag `
-            --title "Tessera $env:VERSION" `
+            --title "Tilepress $env:VERSION" `
             --generate-notes `
-            "dist/Tessera-$env:VERSION-x64.msi" `
-            "dist/Tessera-x64.msi" `
+            "dist/Tilepress-$env:VERSION-x64.msi" `
+            "dist/Tilepress-x64.msi" `
             "dist/SHA256SUMS.txt"

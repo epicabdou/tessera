@@ -1,11 +1,11 @@
 ---
 layout: home
-title: Tessera
+title: Tilepress
 titleTemplate: Free PDF and image tools that run on your PC
-description: Tessera is a free, open-source Windows app with 39 PDF and image tools. Merge, convert, compress, sign and OCR PDFs; resize, convert, retouch and upscale photos. Nothing is uploaded.
+description: Tilepress is a free, open-source Windows app with 39 PDF and image tools. Merge, convert, compress, sign and OCR PDFs; resize, convert, retouch and upscale photos. Nothing is uploaded.
 
 hero:
-  name: Tessera
+  name: Tilepress
   text: PDF and image tools that run on your own computer
   tagline: Merge, convert, compress, sign and OCR PDFs. Resize, convert, retouch and upscale photos. 39 tools, free and open source, and your files never leave your PC.
   image:
@@ -20,7 +20,7 @@ hero:
       link: '#tools'
     - theme: alt
       text: Source on GitHub
-      link: https://github.com/epicabdou/tessera
+      link: https://github.com/epicabdou/tilepress
 
 features:
   - icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
@@ -61,11 +61,11 @@ features:
   <h2>Coming from iLovePDF or iLoveIMG?</h2>
   <p class="lede">You'll find the tools you use there under the same names: Merge PDF, Compress PDF, PDF to Word, Convert to JPG, Remove background and the rest. The difference is where the work happens.</p>
   <Comparison />
-  <p class="fine">A few online-only extras, such as comparing or translating PDFs, aren't in Tessera yet. iLovePDF and iLoveIMG are trademarks of their owners; Tessera is an independent project and is not affiliated with them.</p>
+  <p class="fine">A few online-only extras, such as comparing or translating PDFs, aren't in Tilepress yet. iLovePDF and iLoveIMG are trademarks of their owners; Tilepress is an independent project and is not affiliated with them.</p>
 </section>
 
 <section class="home-section cta">
-  <h2>Get Tessera</h2>
+  <h2>Get Tilepress</h2>
   <p class="lede">One installer, no admin rights needed. Free forever.</p>
   <DownloadPanel />
 </section>

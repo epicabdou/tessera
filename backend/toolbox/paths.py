@@ -25,8 +25,9 @@ def web_dir() -> Path:
     return PROJECT_ROOT / "frontend" / "dist"
 
 
-# The app was called "Toolbox" before it became Tessera; its data folder moves across on first start.
-LEGACY_DATA_DIRS = ("Toolbox",)
+# The app was called "Toolbox", then "Tessera", before it became Tilepress. The newest old data folder
+# moves across on first start.
+LEGACY_DATA_DIRS = ("Tessera", "Toolbox")
 # Files that show a legacy folder is ours, not another app's that happens to share the generic name.
 _DATA_MARKERS = ("settings.json", "toolbox.log")
 

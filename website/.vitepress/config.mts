@@ -1,15 +1,15 @@
 import { defineConfig } from 'vitepress'
 
-export const REPO = 'https://github.com/epicabdou/tessera'
-const BASE = '/tessera/'
+export const REPO = 'https://github.com/epicabdou/tilepress'
+const BASE = '/tilepress/'
 const SITE = `https://epicabdou.github.io${BASE}`
 const DESCRIPTION =
   'Free and open-source PDF and image tools for Windows. Merge, convert, compress, sign, OCR, edit photos and more, on your own computer: nothing is uploaded.'
 
 export default defineConfig({
   lang: 'en-US',
-  title: 'Tessera',
-  titleTemplate: ':title · Tessera',
+  title: 'Tilepress',
+  titleTemplate: ':title · Tilepress',
   description: DESCRIPTION,
   base: BASE,
   cleanUrls: true,
@@ -20,8 +20,8 @@ export default defineConfig({
     ['link', { rel: 'icon', type: 'image/svg+xml', href: `${BASE}favicon.svg` }],
     ['meta', { name: 'theme-color', content: '#7c6cff' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:site_name', content: 'Tessera' }],
-    ['meta', { property: 'og:title', content: 'Tessera: free, local PDF and image tools' }],
+    ['meta', { property: 'og:site_name', content: 'Tilepress' }],
+    ['meta', { property: 'og:title', content: 'Tilepress: free, local PDF and image tools' }],
     ['meta', { property: 'og:description', content: DESCRIPTION }],
     ['meta', { property: 'og:image', content: `${SITE}og.png` }],
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
@@ -29,7 +29,7 @@ export default defineConfig({
 
   themeConfig: {
     logo: { src: '/favicon.svg', alt: '' },
-    siteTitle: 'Tessera',
+    siteTitle: 'Tilepress',
 
     nav: [
       { text: 'Docs', link: '/docs/', activeMatch: '^/docs/' },
@@ -43,7 +43,7 @@ export default defineConfig({
           text: 'Start here',
           items: [
             { text: 'Getting started', link: '/docs/' },
-            { text: 'The Tessera window', link: '/docs/interface' },
+            { text: 'The Tilepress window', link: '/docs/interface' },
             { text: 'History', link: '/docs/history' },
             { text: 'Privacy: what stays on your PC', link: '/docs/privacy' },
           ],
@@ -83,7 +83,7 @@ export default defineConfig({
     lastUpdated: { text: 'Updated' },
     footer: {
       message:
-        'Free software under the <a href="https://www.gnu.org/licenses/gpl-3.0.html">GNU GPL v3</a>. iLovePDF and iLoveIMG are trademarks of their owners; Tessera is not affiliated with them.',
+        'Free software under the <a href="https://www.gnu.org/licenses/gpl-3.0.html">GNU GPL v3</a>. iLovePDF and iLoveIMG are trademarks of their owners; Tilepress is not affiliated with them.',
       copyright: 'Copyright © 2026 epicabdou',
     },
   },

@@ -1,8 +1,8 @@
 import { onMounted, ref } from 'vue'
 
-export const REPO = 'https://github.com/epicabdou/tessera'
+export const REPO = 'https://github.com/epicabdou/tilepress'
 /** The release workflow always uploads the installer under this name too, so this link never changes. */
-export const MSI_LATEST = `${REPO}/releases/latest/download/Tessera-x64.msi`
+export const MSI_LATEST = `${REPO}/releases/latest/download/Tilepress-x64.msi`
 export const RELEASES = `${REPO}/releases`
 export const SOURCE_MAIN = `${REPO}/archive/refs/heads/main.zip`
 
@@ -22,11 +22,12 @@ let cached: Promise<Release | null> | null = null
 export function useLatestRelease() {
   const release = ref<Release | null>(null)
   onMounted(async () => {
-    cached ??= fetch('https://api.github.com/repos/epicabdou/tessera/releases/latest', { headers: { Accept: 'application/vnd.github+json' } })
+    cached ??= fetch('https://api.github.com/repos/epicabdou/tilepress/releases/latest', { headers: { Accept: 'application/vnd.github+json' } })
       .then((r) => (r.ok ? r.json() : null))
       .then((r) => {
         if (!r) return null
-        const msi = r.assets?.find((a: { name: string }) => a.name === 'Tessera-x64.msi')
+        // Releases up to 0.2.0 named the installer Tessera-x64.msi, from before the rename.
+        const msi = r.assets?.find((a: { name: string }) => a.name === 'Tilepress-x64.msi' || a.name === 'Tessera-x64.msi')
         const sums = r.assets?.find((a: { name: string }) => a.name === 'SHA256SUMS.txt')
         return {
           version: String(r.tag_name).replace(/^v/, ''),

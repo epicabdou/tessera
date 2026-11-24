@@ -5,9 +5,9 @@
 
 3. With --msi, packs the folder build into a Windows Installer package (WiX, installer\\*.wxs).
 
-    .venv\\Scripts\\python scripts\\build.py            # folder build: dist\\Tessera\\Tessera.exe
-    .venv\\Scripts\\python scripts\\build.py --onefile  # single file:  dist\\Tessera.exe
-    .venv\\Scripts\\python scripts\\build.py --msi      # installer:    dist\\Tessera-<version>-x64.msi
+    .venv\\Scripts\\python scripts\\build.py            # folder build: dist\\Tilepress\\Tilepress.exe
+    .venv\\Scripts\\python scripts\\build.py --onefile  # single file:  dist\\Tilepress.exe
+    .venv\\Scripts\\python scripts\\build.py --msi      # installer:    dist\\Tilepress-<version>-x64.msi
 
 --msi needs the .NET SDK; it restores the WiX version pinned in dotnet-tools.json.
 The icon and installer artwork come from assets\\ (regenerate them with scripts\\make_brand.py).
@@ -182,10 +182,10 @@ def build_msi(app_dir: Path) -> Path:
     cmd = ["dotnet", "wix", "build", "-arch", "x64", "-ext", ext_id, "-pdbtype", "none", "-o", str(msi)]
     for key, value in variables.items():
         cmd += ["-d", f"{key}={value}"]
-    cmd += [str(INSTALLER / "Tessera.wxs"), str(INSTALLER / "TesseraUI.wxs")]
+    cmd += [str(INSTALLER / "Tilepress.wxs"), str(INSTALLER / "TilepressUI.wxs")]
     run(cmd)
     # Windows Installer's consistency checks. ICE57 misreads the HKMU key of a per-user-or-machine
-    # package (see the comment in Tessera.wxs), so it's skipped.
+    # package (see the comment in Tilepress.wxs), so it's skipped.
     run(["dotnet", "wix", "msi", "validate", "-sice", "ICE57", str(msi)])
     return msi
 

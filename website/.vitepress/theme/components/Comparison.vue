@@ -2,12 +2,12 @@
 // Claims about web-based tools are kept general and hedged on purpose: we describe how
 // online processing works, not any one company's plans or features.
 const rows = [
-  { what: 'Where your files are processed', tessera: 'On your PC', web: 'Uploaded to the service’s servers' },
-  { what: 'Works without internet', tessera: 'Yes', web: 'No' },
-  { what: 'File size and batch limits', tessera: 'Only your PC’s', web: 'Often capped on free plans' },
-  { what: 'Price', tessera: 'Free, no ads, no account', web: 'Usually a free tier plus a subscription' },
-  { what: 'Source code', tessera: 'Open (GNU GPL v3)', web: 'Closed' },
-  { what: 'Runs on', tessera: 'Windows 10 and 11', web: 'Any device with a browser' },
+  { what: 'Where your files are processed', tilepress: 'On your PC', web: 'Uploaded to the service’s servers' },
+  { what: 'Works without internet', tilepress: 'Yes', web: 'No' },
+  { what: 'File size and batch limits', tilepress: 'Only your PC’s', web: 'Often capped on free plans' },
+  { what: 'Price', tilepress: 'Free, no ads, no account', web: 'Usually a free tier plus a subscription' },
+  { what: 'Source code', tilepress: 'Open (GNU GPL v3)', web: 'Closed' },
+  { what: 'Runs on', tilepress: 'Windows 10 and 11', web: 'Any device with a browser' },
 ]
 </script>
 
@@ -17,14 +17,14 @@ const rows = [
       <thead>
         <tr>
           <th scope="col"></th>
-          <th scope="col" class="us">Tessera</th>
+          <th scope="col" class="us">Tilepress</th>
           <th scope="col">Online PDF and image sites</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="r in rows" :key="r.what">
           <th scope="row">{{ r.what }}</th>
-          <td class="us">{{ r.tessera }}</td>
+          <td class="us">{{ r.tilepress }}</td>
           <td>{{ r.web }}</td>
         </tr>
       </tbody>

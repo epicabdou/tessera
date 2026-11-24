@@ -1,4 +1,4 @@
-"""Real screenshots of Tessera for the website (website/public/screenshots/).
+"""Real screenshots of Tilepress for the website (website/public/screenshots/).
 
 The real UI (frontend/dist) runs against the real Python backend, through a small local
 HTTP bridge standing in for pywebview's, and headless Microsoft Edge drives it over the
@@ -39,12 +39,12 @@ ROOT = Path(__file__).resolve().parent.parent
 WEB = ROOT / "frontend" / "dist"
 OUT = ROOT / "website" / "public" / "screenshots"
 # A path without anyone's user name in it: it shows in the Explorer pane.
-DEMO = Path(os.environ.get("PUBLIC", r"C:\Users\Public")) / "Documents" / "Tessera demo"
+DEMO = Path(os.environ.get("PUBLIC", r"C:\Users\Public")) / "Documents" / "Tilepress demo"
 EDGE = Path(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe")
 VIEW = (1440, 900)  # CSS pixels; captured at 2x
 
 # The app's data folder (settings, history) goes to a throwaway place: set before importing the app.
-DATA = Path(tempfile.mkdtemp(prefix="tessera-shots-"))
+DATA = Path(tempfile.mkdtemp(prefix="tilepress-shots-"))
 os.environ["LOCALAPPDATA"] = str(DATA)
 sys.path.insert(0, str(ROOT / "backend"))
 
@@ -554,7 +554,7 @@ def load(cdp: Cdp, url: str, theme: str) -> None:
     cdp("Emulation.setEmulatedMedia", features=[{"name": "prefers-color-scheme", "value": theme}])
     cdp("Page.navigate", url=url)
     time.sleep(0.5)
-    cdp.js(HELPERS + "await T.wait(() => document.querySelector('.bridge-connected'), 'the app'); await T.explore('Tessera demo'); await T.sleep(600)")
+    cdp.js(HELPERS + "await T.wait(() => document.querySelector('.bridge-connected'), 'the app'); await T.explore('Tilepress demo'); await T.sleep(600)")
 
 
 def shot(cdp: Cdp, name: str) -> Path:
@@ -589,7 +589,7 @@ def make_og(screenshot: Path) -> Path:
     card.paste(logo, (64 * ss, 120 * ss), logo)
     draw = ImageDraw.Draw(card)
     font = lambda name, px: ImageFont.truetype(f"C:/Windows/Fonts/{name}", px * ss)  # noqa: E731
-    draw.text((64 * ss, 240 * ss), "Tessera", font=font("seguisb.ttf", 64), fill="white")
+    draw.text((64 * ss, 240 * ss), "Tilepress", font=font("seguisb.ttf", 64), fill="white")
     for i, line in enumerate(["Free PDF and image tools", "that run on your own computer."]):
         draw.text((64 * ss, (330 + i * 40) * ss), line, font=font("segoeui.ttf", 28), fill=(214, 218, 240))
     draw.text((64 * ss, 450 * ss), "Open source · Windows · Nothing uploaded", font=font("segoeui.ttf", 20), fill=(150, 158, 190))

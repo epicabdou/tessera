@@ -7,7 +7,7 @@ description: Turn a PDF into a Word document, a PowerPoint presentation, an Exce
 
 These tools turn a PDF into something you can edit or reuse: a Word document, a PowerPoint presentation, an Excel workbook, image files or a Markdown file. They never change the PDF itself.
 
-Each tool starts with **Choose a PDF to work on**. Click **Open PDF…**, click **Use** followed by the file name to take the PDF selected in the Explorer, or drag a PDF from the Explorer onto the tool. You can also right-click a PDF in the Explorer and choose **Convert from PDF**, which opens it in the conversion tool you used last. The bar above the tool shows the file's name, page count and size, with **Change…** and **Close**. See [The Tessera window](/docs/interface) for the Explorer and the other general controls.
+Each tool starts with **Choose a PDF to work on**. Click **Open PDF…**, click **Use** followed by the file name to take the PDF selected in the Explorer, or drag a PDF from the Explorer onto the tool. You can also right-click a PDF in the Explorer and choose **Convert from PDF**, which opens it in the conversion tool you used last. The bar above the tool shows the file's name, page count and size, with **Change…** and **Close**. See [The Tilepress window](/docs/interface) for the Explorer and the other general controls.
 
 The open PDF is shared with most of the other PDF tools, so you can switch between them without opening it again. While a conversion runs, a progress bar shows how far it has got. When it finishes, a **Saved** card lists the new file with **Open** and **Show in folder**. When PDF to JPG makes a single picture, **Keep editing this file** opens it in the [Photo editor](/docs/img-edit#photo-editor).
 

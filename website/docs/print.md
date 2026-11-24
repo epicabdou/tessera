@@ -7,7 +7,7 @@ description: Print PDFs with control over paper, two-sided printing, pages per s
 
 The Printing category has one tool, Advanced Print. It prints a PDF with more control than a normal print dialog, and shows the sheets exactly as they will come out of the printer.
 
-Open a PDF with **Open PDF…**, with **Use** followed by the selected file's name, or by dragging it from the Explorer. You can also right-click a PDF in the Explorer and choose **Print…**. See [The Tessera window](/docs/interface) for the Explorer and the other general controls.
+Open a PDF with **Open PDF…**, with **Use** followed by the selected file's name, or by dragging it from the Explorer. You can also right-click a PDF in the Explorer and choose **Print…**. See [The Tilepress window](/docs/interface) for the Explorer and the other general controls.
 
 ## Advanced Print
 

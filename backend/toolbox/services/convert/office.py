@@ -123,7 +123,7 @@ def _office_pid(app) -> int | None:
     except Exception:  # noqa: BLE001
         pass
     if not hwnd:  # Word has no Application.Hwnd: find its main window by a unique caption
-        token = f"Tessera {uuid.uuid4().hex}"
+        token = f"Tilepress {uuid.uuid4().hex}"
         try:
             app.Caption = token
             hwnd = win32gui.FindWindow("OpusApp", token)

@@ -95,7 +95,7 @@ function HistoryPanel() {
     <div className="popover history" role="dialog" aria-label="History">
       <div className="history-head">
         <strong>History</strong>
-        <label className="check small" title="Record each file Tessera makes. Only file names, places and times are kept.">
+        <label className="check small" title="Record each file Tilepress makes. Only file names, places and times are kept.">
           <input type="checkbox" checked={enabled} onChange={(e) => void toggle(e.target.checked)} /> Keep history
         </label>
       </div>

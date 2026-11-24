@@ -7,7 +7,7 @@ description: Add or remove PDF passwords and restrictions, sign PDFs by hand or 
 
 These tools protect a PDF with a password or restrictions (or remove them), sign it, make it smaller, and recover damaged files. In the app this category is the **Security** tab under **Documents**.
 
-Sign PDF and Compress PDF work on the same open PDF as the other PDF tools. Protect PDF and Repair PDF keep their own file, because they also have to open files the other tools can't: password-protected PDFs and damaged ones. To open a PDF, drag it from the Explorer onto the tool, click **Open PDF…**, or click **Use** followed by the name of the PDF selected in the Explorer. Right-clicking a PDF in the Explorer also offers **Sign PDF** and **Protect PDF**. See [The Tessera window](/docs/interface) for the general controls.
+Sign PDF and Compress PDF work on the same open PDF as the other PDF tools. Protect PDF and Repair PDF keep their own file, because they also have to open files the other tools can't: password-protected PDFs and damaged ones. To open a PDF, drag it from the Explorer onto the tool, click **Open PDF…**, or click **Use** followed by the name of the PDF selected in the Explorer. Right-clicking a PDF in the Explorer also offers **Sign PDF** and **Protect PDF**. See [The Tilepress window](/docs/interface) for the general controls.
 
 Every tool saves a **new** file and leaves the original alone. When it's done, a **Saved** card lists the result with **Open**, **Show in folder** and **Keep editing this file**. Each run is listed in the [History](/docs/history), but passwords never are: the History records which files a tool used and made, never the options you typed.
 
@@ -17,7 +17,7 @@ Protect PDF encrypts a PDF with a password, restricts what readers may do with i
 
 ### How to use it
 
-1. Open **Protect PDF** and open a PDF. Tessera reads its security first.
+1. Open **Protect PDF** and open a PDF. Tilepress reads its security first.
 2. To require a password to open the file, type it in **Open password** and again in **Confirm**.
 3. To limit what people can do, untick the actions under **Restrictions**.
 4. Optionally type a **Permissions password** and choose the **Encryption**.
@@ -33,7 +33,7 @@ You need an open password, at least one unticked restriction, or both. Otherwise
 | **Confirm** | Type the open password again. A message tells you if they don't match. | |
 | **Show passwords** | Shows the passwords as you type instead of dots. | Off |
 | **Restrictions** | What readers may do: **Printing**, **High-quality printing**, **Copying text and images**, **Editing the content**, **Comments and annotations**, **Filling in forms**, **Inserting, deleting and rotating pages**, **Text access for screen readers**. Untick what you want to forbid. | All allowed |
-| **Permissions password** | The password needed to change the restrictions. It must differ from the open password. If you leave it empty, Tessera makes up a random one and doesn't show it. | Empty (random) |
+| **Permissions password** | The password needed to change the restrictions. It must differ from the open password. If you leave it empty, Tilepress makes up a random one and doesn't show it. | Empty (random) |
 | **Encryption** | **AES 256-bit (recommended)**, AES 128-bit for older readers, or **RC4 128-bit (old readers)**. | AES 256-bit |
 
 ### Unlock
@@ -50,7 +50,7 @@ The saved copy has no password and no restrictions. Only remove protection from 
 - The file is suggested as `name_protected.pdf` (or `name_unlocked.pdf`) next to the original.
 - An open password is real encryption: without it, nobody can read the file. Restrictions are different. PDF readers are expected to respect them, but they aren't a strong barrier on their own.
 - A file that opens without a password but has restrictions can be unlocked here without typing anything.
-- Tessera can't protect a file that is already protected. Unlock it first.
+- Tilepress can't protect a file that is already protected. Unlock it first.
 - A password-protected PDF opens only in Protect PDF and [Repair PDF](#repair-pdf). Unlock a copy first to use it in the other tools.
 - **Keep editing this file** opens the result in Protect PDF again, where it shows as protected.
 - Passwords aren't stored anywhere, including the [History](/docs/history).
@@ -83,7 +83,7 @@ To remove a placed item, select it and press <kbd>Delete</kbd>, or click **Remov
 ### Digital signature
 
 1. Under **Certificate**, click **Choose .pfx / .p12…** and pick your certificate file. If you don't have one, click **Create a certificate…** (see below).
-2. Type the **Certificate password** and click **Check** (or press <kbd>Enter</kbd>). Tessera shows who the certificate belongs to, who issued it (or "Self-signed") and until when it's valid.
+2. Type the **Certificate password** and click **Check** (or press <kbd>Enter</kbd>). Tilepress shows who the certificate belongs to, who issued it (or "Self-signed") and until when it's valid.
 3. Fill in the **Details**: **Reason**, **Location** and **Contact**.
 4. Leave **Show a signature box on the page** ticked to add a visible box. Until you place it, it sits at the bottom right of the page you're looking at (the last page at first). Click on a page to put it there, and drag its edges to resize it.
 5. Click **Sign and save…**, choose a name and folder, and click **Save**.
@@ -136,11 +136,11 @@ When a signature is intact but its certificate is self-signed, or doesn't come f
 
 - The file is suggested as `name_signed.pdf` next to the original.
 - An electronic signature is a picture drawn into the page. It looks like a signature but doesn't protect the file from changes. In the History it's listed as "Edit PDF".
-- A digital signature uses the PAdES format with SHA-256. Tessera adds it as an update at the end of the file, so the original content stays byte for byte as it was. Signing again adds another signature (named `Signature1`, `Signature2`…), and earlier signatures stay intact.
+- A digital signature uses the PAdES format with SHA-256. Tilepress adds it as an update at the end of the file, so the original content stays byte for byte as it was. Signing again adds another signature (named `Signature1`, `Signature2`…), and earlier signatures stay intact.
 - The signing time comes from your computer's clock. No time-stamp server is contacted.
 - A certificate you create is self-signed: an RSA 3072-bit key, valid for three years. It proves the file hasn't changed since you signed it, but PDF readers will show you as not verified. For a trusted signature, use a certificate from a certificate authority.
-- Tessera remembers which certificate file you used last, but never its password.
-- Checking signatures happens on your computer. Tessera doesn't download revocation lists or contact any server.
+- Tilepress remembers which certificate file you used last, but never its password.
+- Checking signatures happens on your computer. Tilepress doesn't download revocation lists or contact any server.
 - Typed signatures use handwriting fonts that come with Windows. If one is missing, a generic handwriting-style font is used instead.
 - A digital signature can't be added to a protected PDF, even one that only has restrictions. Remove the protection first with [Protect PDF](#protect-pdf).
 
@@ -182,7 +182,7 @@ Repair PDF checks a PDF for damage, lists what's wrong, and rebuilds it so it op
 
 ### How to use it
 
-1. Open **Repair PDF** and open a PDF. Tessera checks the file straight away.
+1. Open **Repair PDF** and open a PDF. Tilepress checks the file straight away.
 2. Read the result: **No problems found**, or how many problems were found with a list of them (up to 12 are shown). It also shows the file size and how many pages can be read.
 3. Click **Repair and save…**, choose a name and folder, and click **Save**.
 

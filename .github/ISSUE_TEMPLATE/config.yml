@@ -1,11 +1,11 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Tessera documentation
-    url: https://epicabdou.github.io/tessera/
+  - name: Tilepress documentation
+    url: https://epicabdou.github.io/tilepress/
     about: How each tool works, with answers to common questions.
   - name: Get help
-    url: https://epicabdou.github.io/tessera/support
+    url: https://epicabdou.github.io/tilepress/support
     about: Troubleshooting and where to ask for help.
   - name: Report a security vulnerability
-    url: https://github.com/epicabdou/tessera/security/advisories/new
+    url: https://github.com/epicabdou/tilepress/security/advisories/new
     about: Please report security problems privately, not in a public issue.

@@ -1,21 +1,21 @@
 <img src="frontend/public/favicon.svg" alt="" width="72" height="72">
 
-# Tessera
+# Tilepress
 
 **PDF and image tools that run on your own computer.**
 
 Merge, split, convert, sign, protect, OCR and compress PDFs; resize, convert, crop and enhance images; write LaTeX. Your files are processed on your PC, never uploaded. A free, open-source alternative to online tools like iLovePDF and iLoveIMG.
 
-**[Download for Windows](https://github.com/epicabdou/tessera/releases/latest/download/Tessera-x64.msi)** · [Website](https://epicabdou.github.io/tessera/) · [Documentation](https://epicabdou.github.io/tessera/docs/) · [Support](https://epicabdou.github.io/tessera/support) · [Releases](https://github.com/epicabdou/tessera/releases)
+**[Download for Windows](https://github.com/epicabdou/tilepress/releases/latest/download/Tilepress-x64.msi)** · [Website](https://epicabdou.github.io/tilepress/) · [Documentation](https://epicabdou.github.io/tilepress/docs/) · [Support](https://epicabdou.github.io/tilepress/support) · [Releases](https://github.com/epicabdou/tilepress/releases)
 
-![Tessera merging three PDFs, with the Explorer on the left and a live preview on the right](website/public/screenshots/merge.webp)
+![Tilepress merging three PDFs, with the Explorer on the left and a live preview on the right](website/public/screenshots/merge.webp)
 
 ## For developers
 
 Under the hood it's a desktop app with a **React** UI and **Python** business logic, shipped as a native Windows executable.
 
 ```
-┌──────────────── Tessera.exe ─────────────────┐
+┌──────────────── Tilepress.exe ─────────────────┐
 │  Native window (pywebview → WebView2)        │
 │  ┌────────────────────────────────────────┐  │
 │  │ React + TypeScript (Vite)              │  │
@@ -31,8 +31,8 @@ Under the hood it's a desktop app with a **React** UI and **Python** business lo
 
 - **[pywebview](https://pywebview.flowrl.com/)** opens a native window using the WebView2 runtime built into Windows 10/11. Python methods are callable from JavaScript directly, so there's no REST API and no open port for the bridge.
 - **Vite + React + TypeScript** for the UI, with hot reload during development.
-- **PyInstaller** bundles Python, the backend and the built UI into `Tessera.exe`.
-- **pypdf** (BSD) edits PDFs and **pypdfium2** (PDFium, Apache/BSD) renders page previews. Both have permissive licences that are compatible with Tessera's GPL. PyMuPDF was avoided because it is AGPL.
+- **PyInstaller** bundles Python, the backend and the built UI into `Tilepress.exe`.
+- **pypdf** (BSD) edits PDFs and **pypdfium2** (PDFium, Apache/BSD) renders page previews. Both have permissive licences that are compatible with Tilepress's GPL. PyMuPDF was avoided because it is AGPL.
 - **pywin32** drives Microsoft Office for document conversion. **markdown-it-py** and **Pygments** render Markdown. All three are permissively licensed.
 - **pdfplumber**, **python-docx**, **python-pptx** and **openpyxl** (all MIT) convert PDFs to Office files. **ReportLab** (BSD) draws text, images and shapes onto pages. **pyHanko** (MIT) and **cryptography** (Apache/BSD) make and check digital signatures. OCR uses **Tesseract** when it's installed, otherwise the OCR engine built into Windows (through the **winrt** packages).
 - The LaTeX editor uses **CodeMirror** (MIT) and compiles with **Tectonic** (MIT), which the app downloads on first launch (see [Runtime notes](#runtime-notes)).
@@ -82,7 +82,7 @@ The Preview panel shows whatever is selected in the Explorer. It follows arrow-k
 
 Every preview has **Open**, **Show in folder** and **Copy path** buttons. Hide the panel with its × button, and bring it back with the panel button at the right of the top bar.
 
-Pins, the last folder, the hidden-items toggle, both panel widths and whether the Preview is open are saved by Python in `%LOCALAPPDATA%\Tessera\settings.json`.
+Pins, the last folder, the hidden-items toggle, both panel widths and whether the Preview is open are saved by Python in `%LOCALAPPDATA%\Tilepress\settings.json`.
 
 ## Tools
 
@@ -240,13 +240,13 @@ Opening `http://127.0.0.1:5173` in a regular browser shows the UI, but it can't 
 .venv\Scripts\python scripts\build.py
 ```
 
-This produces `dist\Tessera\Tessera.exe`, a folder build that starts fastest. Zip the `dist\Tessera` folder to distribute it.
+This produces `dist\Tilepress\Tilepress.exe`, a folder build that starts fastest. Zip the `dist\Tilepress` folder to distribute it.
 
 ```powershell
 .venv\Scripts\python scripts\build.py --onefile
 ```
 
-This produces a single `dist\Tessera.exe`. It's easier to hand around, but it starts more slowly because it unpacks itself to a temporary folder on every launch.
+This produces a single `dist\Tilepress.exe`. It's easier to hand around, but it starts more slowly because it unpacks itself to a temporary folder on every launch.
 
 ### Windows installer (.msi)
 
@@ -254,13 +254,13 @@ This produces a single `dist\Tessera.exe`. It's easier to hand around, but it st
 .venv\Scripts\python scripts\build.py --msi
 ```
 
-This builds the folder version, then packs it into `dist\Tessera-<version>-x64.msi` (about 75 MB) and runs Windows Installer's consistency checks on it. Add `--skip-app` to repack the existing `dist\Tessera` without rebuilding it.
+This builds the folder version, then packs it into `dist\Tilepress-<version>-x64.msi` (about 75 MB) and runs Windows Installer's consistency checks on it. Add `--skip-app` to repack the existing `dist\Tilepress` without rebuilding it.
 
-- **Install:** double-click the MSI. It installs for the current user in `%LocalAppData%\Programs\Tessera`, with no admin prompt, adds a Start menu shortcut, and offers to launch Tessera at the end. To install for everyone on the PC in Program Files, run it elevated: `msiexec /i Tessera-<version>-x64.msi ALLUSERS=1`.
-- **Upgrade:** bump `__version__` in `backend/toolbox/__init__.py` and build again. A newer MSI replaces the installed version; an older one refuses to install over a newer one. Never change the `UpgradeCode` in `installer/Tessera.wxs`.
-- **Uninstall:** Settings → Apps, or `msiexec /x Tessera-<version>-x64.msi`. Your data in `%LOCALAPPDATA%\Tessera\` is kept.
+- **Install:** double-click the MSI. It installs for the current user in `%LocalAppData%\Programs\Tilepress`, with no admin prompt, adds a Start menu shortcut, and offers to launch Tilepress at the end. To install for everyone on the PC in Program Files, run it elevated: `msiexec /i Tilepress-<version>-x64.msi ALLUSERS=1`.
+- **Upgrade:** bump `__version__` in `backend/toolbox/__init__.py` and build again. A newer MSI replaces the installed version; an older one refuses to install over a newer one. Never change the `UpgradeCode` in `installer/Tilepress.wxs`.
+- **Uninstall:** Settings → Apps, or `msiexec /x Tilepress-<version>-x64.msi`. Your data in `%LOCALAPPDATA%\Tilepress\` is kept.
 - **Tooling:** the [WiX Toolset](https://wixtoolset.org/) 5.0.2, pinned in `dotnet-tools.json` and restored automatically (it needs the .NET SDK 6 or later). WiX 6 and later require accepting the Open Source Maintenance Fee EULA, which is why the project stays on 5.
-- **Sources:** `installer\Tessera.wxs` (package, files, shortcut) and `installer\TesseraUI.wxs` (dialogs: Welcome, Ready, Finish; no licence page). The dialog artwork in `assets\installer\` comes from `scripts\make_brand.py`.
+- **Sources:** `installer\Tilepress.wxs` (package, files, shortcut) and `installer\TilepressUI.wxs` (dialogs: Welcome, Ready, Finish; no licence page). The dialog artwork in `assets\installer\` comes from `scripts\make_brand.py`.
 
 The app icon is `assets\icon.ico`, also generated by `scripts\make_brand.py`.
 
@@ -281,11 +281,11 @@ $env:TOOLBOX_OFFICE_TESTS = "1"; .venv\Scripts\python -m pytest backend/tests/te
 The image AI tests use stand-in models by default (to check tiling, masking and the checksum-verified download exactly). To also run the real models, point `TOOLBOX_AI_MODELS` at a models folder, such as the app's own:
 
 ```powershell
-$env:TOOLBOX_AI_MODELS = "$env:LOCALAPPDATA\Tessera\models"; .venv\Scripts\python -m pytest backend/tests/test_images.py
+$env:TOOLBOX_AI_MODELS = "$env:LOCALAPPDATA\Tilepress\models"; .venv\Scripts\python -m pytest backend/tests/test_images.py
 ```
 
 ```powershell
-dist\Tessera\Tessera.exe --self-test
+dist\Tilepress\Tilepress.exe --self-test
 ```
 
 The self-test checks the whole stack:
@@ -375,8 +375,8 @@ assets/
   icon.ico                 the app icon, 16–256 px
   installer/               MSI dialog artwork (dialog.bmp, banner.bmp)
 installer/
-  Tessera.wxs              the MSI: files, Start menu shortcut, upgrades
-  TesseraUI.wxs            its dialogs
+  Tilepress.wxs              the MSI: files, Start menu shortcut, upgrades
+  TilepressUI.wxs            its dialogs
 website/                   the website and user docs (VitePress): npm run dev / npm run build
 .github/workflows/         CI, MSI releases on v* tags, website deploy to GitHub Pages
 ```
@@ -398,17 +398,17 @@ Calls from JS run on pywebview worker threads, so slow work won't freeze the win
 
 ## Brand
 
-- **Name.** A *tessera* is one small tile of a mosaic. Tessera is many small tools that make one whole.
+- **Name.** Tiles, as in the mosaic mark, and a press, as in printing: many small tools that make one whole. The app was called Tessera until 0.2.0; that name was already taken.
 - **Tagline.** "PDF and image tools that run on your own computer." Lead with what the app does and that files stay on the PC.
 - **Mark.** A "T" laid from five white tiles on a rounded gradient square. From 32 px up, the four empty cells of the 3 × 3 grid show faintly. Use it as is: don't recolour the tiles, add effects, or set it on a busy background.
-- **Wordmark.** "Tessera" in Segoe UI Variable Display, bold, next to the mark (as in the app header).
+- **Wordmark.** "Tilepress" in Segoe UI Variable Display, bold, next to the mark (as in the app header).
 - **Colour.** The aurora gradient, `#7c6cff` → `#4f8bff` → `#36c5ef` (violet, blue, cyan) at 135°, is `--accent-grad` in `src/index.css`. Ink is `#090c18` (dark theme background).
-- **Where the name lives.** `APP_NAME` / `TAGLINE` in `backend/toolbox/__init__.py` (window title, exe name, data folder, About box) and `frontend/src/brand.ts` (UI). The Python package and internal identifiers (`toolbox`, `TOOLBOX_*` test variables, drag-and-drop types, storage keys) keep the old name on purpose: renaming them would only break saved state.
+- **Where the name lives.** `APP_NAME` / `TAGLINE` in `backend/toolbox/__init__.py` (window title, exe name, data folder, About box) and `frontend/src/brand.ts` (UI). A data folder left by an older name (`Tessera`, or `Toolbox` before that) moves across on first start (`LEGACY_DATA_DIRS` in `backend/toolbox/paths.py`). The Python package and internal identifiers (`toolbox`, `TOOLBOX_*` test variables, drag-and-drop types, storage keys) keep the old name on purpose: renaming them would only break saved state.
 - **Logo files** are generated: edit `scripts/make_brand.py`, then run `.venv\Scripts\python scripts\make_brand.py`.
 
 ## Runtime notes
 
-- Everything is stored under `%LOCALAPPDATA%\Tessera\`. A folder left by a build from when the app was called Toolbox (`%LOCALAPPDATA%\Toolbox\`) is moved there on first start:
+- Everything is stored under `%LOCALAPPDATA%\Tilepress\`. A folder left by a build from when the app was called Toolbox (`%LOCALAPPDATA%\Toolbox\`) is moved there on first start:
   - `settings.json`: pins and preferences.
   - `history.db` (with `-wal` and `-shm` while the app runs): the activity history.
   - `toolbox.log`: the log.
@@ -430,7 +430,7 @@ Calls from JS run on pywebview worker threads, so slow work won't freeze the win
 The website and user documentation live in `website/` (VitePress) and are published to GitHub Pages by `.github/workflows/pages.yml`.
 
 ```powershell
-cd website; npm install; npm run dev     # http://localhost:5174/tessera/
+cd website; npm install; npm run dev     # http://localhost:5174/tilepress/
 ```
 
 The screenshots are real: `scripts/screenshots.py` generates fictional demo files, runs the built UI against the real Python backend through a small local bridge, and captures it with headless Microsoft Edge. Browsing is confined to the demo folder, and the app's data folder is a temporary one, so nothing personal can appear. After a UI change:
@@ -448,6 +448,6 @@ Bug reports, ideas and pull requests are welcome: see [CONTRIBUTING.md](CONTRIBU
 
 Copyright (C) 2026 epicabdou.
 
-Tessera is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY. See [LICENSE](LICENSE) for the full text.
+Tilepress is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY. See [LICENSE](LICENSE) for the full text.
 
-Tessera bundles and downloads third-party components under their own licenses: see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). iLovePDF and iLoveIMG are trademarks of their respective owners; Tessera is not affiliated with them.
+Tilepress bundles and downloads third-party components under their own licenses: see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). iLovePDF and iLoveIMG are trademarks of their respective owners; Tilepress is not affiliated with them.

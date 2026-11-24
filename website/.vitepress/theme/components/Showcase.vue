@@ -9,7 +9,7 @@ const shots = [
   { id: 'photo-editor', label: 'Photo editor', caption: 'Looks, light and colour, text, drawings, arrows and logos, all undoable.' },
   { id: 'watermark', label: 'Watermark', caption: 'The preview shows exactly what will be saved, before you save it.' },
   { id: 'organize', label: 'Organize pages', caption: 'Drag pages into order; rotate, duplicate, delete or insert them.' },
-  { id: 'history', label: 'History', caption: 'Every file Tessera made, searchable, with the files it came from.' },
+  { id: 'history', label: 'History', caption: 'Every file Tilepress made, searchable, with the files it came from.' },
   { id: 'merge-light', label: 'Light theme', caption: 'Light or dark, following your Windows setting.' },
 ]
 const active = ref(0)
@@ -37,7 +37,7 @@ const active = ref(0)
           v-show="i === active"
           :key="s.id"
           :src="withBase(`/screenshots/${s.id}.webp`)"
-          :alt="`Tessera, ${s.label}`"
+          :alt="`Tilepress, ${s.label}`"
           width="1440"
           height="900"
           :loading="i === 0 ? 'eager' : 'lazy'"

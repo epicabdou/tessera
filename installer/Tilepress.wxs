@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The Tessera MSI. Build it with scripts\build.py and its "msi" option (see README).
+  The Tilepress MSI. Build it with scripts\build.py and its "msi" option (see README).
   WiX 5 is pinned in dotnet-tools.json; build.py passes the variables below.
 
-  Per-user by default: installs to %LocalAppData%\Programs\Tessera, no admin rights needed.
-  For every user of the PC, in Program Files (elevated):  msiexec /i Tessera-<version>-x64.msi ALLUSERS=1
+  Per-user by default: installs to %LocalAppData%\Programs\Tilepress, no admin rights needed.
+  For every user of the PC, in Program Files (elevated):  msiexec /i Tilepress-<version>-x64.msi ALLUSERS=1
 
   Variables: ProductName, Manufacturer, Version, Description, SourceDir (the PyInstaller folder build), AssetsDir.
 -->
@@ -52,12 +52,12 @@
       </Component>
     </StandardDirectory>
 
-    <!-- Dialogs: Welcome, Install, Finish (with "Launch"); see TesseraUI.wxs. Artwork from scripts\make_brand.py. -->
+    <!-- Dialogs: Welcome, Install, Finish (with "Launch"); see TilepressUI.wxs. Artwork from scripts\make_brand.py. -->
     <WixVariable Id="WixUIDialogBmp" Value="$(var.AssetsDir)\installer\dialog.bmp" />
     <WixVariable Id="WixUIBannerBmp" Value="$(var.AssetsDir)\installer\banner.bmp" />
     <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.ProductName)" />
     <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
     <CustomAction Id="LaunchApp" Directory="INSTALLFOLDER" ExeCommand="&quot;[INSTALLFOLDER]$(var.ProductName).exe&quot;" Return="asyncNoWait" />
-    <UIRef Id="TesseraUI" />
+    <UIRef Id="TilepressUI" />
   </Package>
 </Wix>
