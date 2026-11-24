@@ -1,4 +1,7 @@
-"""Real screenshots of Tilepress for the website (website/public/screenshots/).
+"""Real screenshots of Tilepress for the website (public/screenshots/ and public/og.png).
+
+The website has its own repository, epicabdou/tilepress-website. Clone it next to this
+one (..\\tilepress-website) and the files go straight into it, or pass --site <folder>.
 
 The real UI (frontend/dist) runs against the real Python backend, through a small local
 HTTP bridge standing in for pywebview's, and headless Microsoft Edge drives it over the
@@ -37,7 +40,8 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
 WEB = ROOT / "frontend" / "dist"
-OUT = ROOT / "website" / "public" / "screenshots"
+SITE = ROOT.parent / "tilepress-website"  # the website repo's checkout; --site changes it
+OUT = SITE / "public" / "screenshots"
 # A path without anyone's user name in it: it shows in the Explorer pane.
 DEMO = Path(os.environ.get("PUBLIC", r"C:\Users\Public")) / "Documents" / "Tilepress demo"
 EDGE = Path(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe")
@@ -426,9 +430,18 @@ def main() -> int:
     parser.add_argument("scenes", nargs="*", help="scene names (default: all)")
     parser.add_argument("--serve", action="store_true", help="only run the bridge and print its URL")
     parser.add_argument("--keep", action="store_true", help="keep the demo folder afterwards")
+    parser.add_argument("--site", type=Path, default=SITE, help=f"the website repo's checkout (default: {SITE})")
     args = parser.parse_args()
     if not (WEB / "index.html").is_file():
         raise SystemExit("Build the frontend first: npm run build in frontend/")
+    global OUT
+    OUT = args.site.resolve() / "public" / "screenshots"
+    if not args.serve and not (args.site / ".vitepress").is_dir():
+        raise SystemExit(
+            f"No website checkout at {args.site}. Clone it there:\n"
+            f"  git clone https://github.com/epicabdou/tilepress-website.git {args.site}\n"
+            "or pass --site <folder>."
+        )
 
     DEMO_FILES.update(make_demo(DEMO))
     api = make_api()
@@ -701,13 +714,13 @@ def capture(url: str, api: DemoApi, names: list[str]) -> int:
             try:
                 load(cdp, url, scene.get("theme", "dark"))
                 cdp.js(scene["js"])
-                print(f"  {name}: {shot(cdp, name).relative_to(ROOT)}", flush=True)
+                print(f"  {name}: {shot(cdp, name)}", flush=True)
                 if name == "merge":
-                    print(f"  og image: {make_og(OUT / 'merge.webp').relative_to(ROOT)}", flush=True)
+                    print(f"  og image: {make_og(OUT / 'merge.webp')}", flush=True)
             except Exception as exc:  # noqa: BLE001 - keep going, report at the end
                 failed += 1
                 debug = shot(cdp, f"_failed-{name}")
-                print(f"  {name}: FAILED: {exc}  (page as it was: {debug.relative_to(ROOT)})", flush=True)
+                print(f"  {name}: FAILED: {exc}  (page as it was: {debug})", flush=True)
             if cdp.errors:
                 print(f"    page errors: {cdp.errors[-3:]}", flush=True)
                 cdp.errors.clear()

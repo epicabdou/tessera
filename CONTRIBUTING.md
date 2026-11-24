@@ -1,6 +1,6 @@
 # Contributing to Tilepress
 
-Thanks for helping. Tilepress is a Windows desktop app: a React + TypeScript UI (`frontend/`) over Python business logic (`backend/`), bundled with PyInstaller and shipped as an MSI. The user guide lives at **<https://epicabdou.github.io/tilepress/>** (sources in `website/`).
+Thanks for helping. Tilepress is a Windows desktop app: a React + TypeScript UI (`frontend/`) over Python business logic (`backend/`), bundled with PyInstaller and shipped as an MSI. The user guide lives at **<https://epicabdou.github.io/tilepress/>** (sources in [epicabdou/tilepress-website](https://github.com/epicabdou/tilepress-website)).
 
 By taking part you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
@@ -101,7 +101,7 @@ The project layout is described in [README.md](README.md#project-layout).
 - Tools never overwrite their input. They save a new file, suggest a name like `name_rotated.pdf`, and ask before replacing an existing file.
 - The product is called Tilepress, but the Python package and internal identifiers (`toolbox`, `TOOLBOX_*` variables, storage keys, drag-and-drop types) keep the old name on purpose. Renaming them would break saved state.
 - New dependencies need a license compatible with GPL-3.0 (permissive licenses are preferred). Say why you need it in the pull request, and add it to [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
-- When behaviour changes, update the user guide in `website/docs/` and, for developer-facing changes, `README.md`.
+- When behaviour changes, update the user guide (`docs/` in [the website repo](https://github.com/epicabdou/tilepress-website)) and, for developer-facing changes, `README.md`.
 
 **Python** (`backend/`)
 
@@ -135,15 +135,7 @@ npm run build
 npx oxlint
 ```
 
-If you changed the docs in `website/`:
-
-```powershell
-cd website
-npm install
-npm run build
-```
-
-Preview the site while you write with `npm run dev` in `website/` (it serves on port 5174).
+The user guide and website are in their own repository, [epicabdou/tilepress-website](https://github.com/epicabdou/tilepress-website): send documentation changes there. Its README explains how to preview and build it.
 
 If you changed packaging (dependencies, `scripts/build.py`, `installer/`, data files a library needs at runtime), also build the app and run `dist\Tilepress\Tilepress.exe --self-test`.
 

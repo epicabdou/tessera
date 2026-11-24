@@ -8,7 +8,7 @@ Merge, split, convert, sign, protect, OCR and compress PDFs; resize, convert, cr
 
 **[Download for Windows](https://github.com/epicabdou/tilepress/releases/latest/download/Tilepress-x64.msi)** · [Website](https://epicabdou.github.io/tilepress/) · [Documentation](https://epicabdou.github.io/tilepress/docs/) · [Support](https://epicabdou.github.io/tilepress/support) · [Releases](https://github.com/epicabdou/tilepress/releases)
 
-![Tilepress merging three PDFs, with the Explorer on the left and a live preview on the right](website/public/screenshots/merge.webp)
+![Tilepress merging three PDFs, with the Explorer on the left and a live preview on the right](https://epicabdou.github.io/tilepress/screenshots/merge.webp)
 
 ## For developers
 
@@ -370,15 +370,14 @@ scripts/
   dev.py                   Vite + window, one command
   build.py                 frontend build + PyInstaller
   make_brand.py            regenerates the logo (favicon.svg), the Windows icon and the installer artwork
-  screenshots.py           real screenshots for the website (demo files, local bridge, headless Edge)
+  screenshots.py           real screenshots for the website repo (demo files, local bridge, headless Edge)
 assets/
   icon.ico                 the app icon, 16–256 px
   installer/               MSI dialog artwork (dialog.bmp, banner.bmp)
 installer/
   Tilepress.wxs              the MSI: files, Start menu shortcut, upgrades
   TilepressUI.wxs            its dialogs
-website/                   the website and user docs (VitePress): npm run dev / npm run build
-.github/workflows/         CI, MSI releases on v* tags, website deploy to GitHub Pages
+.github/workflows/         CI, and MSI releases on v* tags
 ```
 
 ## Adding a feature
@@ -427,13 +426,9 @@ Calls from JS run on pywebview worker threads, so slow work won't freeze the win
 
 ## Website and screenshots
 
-The website and user documentation live in `website/` (VitePress) and are published to GitHub Pages by `.github/workflows/pages.yml`.
+The website and user documentation have their own repository, [epicabdou/tilepress-website](https://github.com/epicabdou/tilepress-website) (VitePress). It's still served at <https://epicabdou.github.io/tilepress/>: its workflow publishes each build to this repo's `gh-pages` branch, which GitHub Pages serves. Leave that branch alone; every publish replaces it.
 
-```powershell
-cd website; npm install; npm run dev     # http://localhost:5174/tilepress/
-```
-
-The screenshots are real: `scripts/screenshots.py` generates fictional demo files, runs the built UI against the real Python backend through a small local bridge, and captures it with headless Microsoft Edge. Browsing is confined to the demo folder, and the app's data folder is a temporary one, so nothing personal can appear. After a UI change:
+The screenshots are real: `scripts/screenshots.py` generates fictional demo files, runs the built UI against the real Python backend through a small local bridge, and captures it with headless Microsoft Edge. Browsing is confined to the demo folder, and the app's data folder is a temporary one, so nothing personal can appear. It writes them into the website repo, cloned next to this one (`..	ilepress-website`, or pass `--site <folder>`). After a UI change:
 
 ```powershell
 cd frontend; npm run build; cd ..

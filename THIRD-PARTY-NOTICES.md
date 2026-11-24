@@ -138,7 +138,6 @@ Tilepress can use these when they are on the PC, but never ships or downloads th
 | oxlint | MIT | <https://oxc.rs/> |
 | pytest | MIT | <https://pytest.org/> |
 | websocket-client, used by `scripts/screenshots.py` to take the website's screenshots | Apache-2.0 | <https://github.com/websocket-client/websocket-client> |
-| VitePress, which builds the website (the site it generates includes Vue, MIT) | MIT | <https://vitepress.dev/> |
 
 ## Keeping this file up to date
 
