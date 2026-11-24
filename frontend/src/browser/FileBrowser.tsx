@@ -27,6 +27,7 @@ import {
 } from '../lib/bridge'
 import { cls } from '../lib/cls'
 import { samePath } from '../lib/format'
+import { explorerExtension, REVEAL_EVENT, type ExplorerContext } from '../lib/platform'
 import { convertToolFor, extOf, isImage, isPdf, type CategoryId, type ToolId } from '../lib/workspace'
 import { PathBar } from './PathBar'
 import { PinnedList } from './PinnedList'
@@ -64,6 +65,9 @@ export function FileBrowser({ selected, onSelect, onOpenInTool, filesVersion }: 
   const [menu, setMenu] = useState<MenuState | null>(null)
   const [toast, setToast] = useState<Toast | null>(null)
   const [sections, setSections] = useState({ pinned: true, locations: true })
+  const [dropping, setDropping] = useState(false)
+  const ext = explorerExtension()
+  const shell = !ext?.hideShellItems
 
   const root = nav.index >= 0 ? nav.stack[nav.index] : null
   const showHidden = settings?.show_hidden ?? false
@@ -102,6 +106,16 @@ export function FileBrowser({ selected, onSelect, onOpenInTool, filesVersion }: 
   const goUp = () => {
     if (listing?.parent) visit(listing.parent)
   }
+
+  // "Show in folder" from elsewhere in the UI, for hosts without an OS file manager (REVEAL_EVENT).
+  useEffect(() => {
+    const onReveal = (e: Event) => {
+      const path = (e as CustomEvent<string>).detail
+      if (typeof path === 'string') visit(path.replace(/[\\/][^\\/]*$/, '') || path)
+    }
+    window.addEventListener(REVEAL_EVENT, onReveal)
+    return () => window.removeEventListener(REVEAL_EVENT, onReveal)
+  }, [visit])
 
   async function submitPath(text: string) {
     visit(await call('resolve_dir', text))
@@ -175,18 +189,27 @@ export function FileBrowser({ selected, onSelect, onOpenInTool, filesVersion }: 
 
   const activate = (entry: FsEntry) => (entry.is_dir ? visit(entry.path) : openPath(entry.path))
 
+  const ctx: ExplorerContext = {
+    root,
+    refresh: tree.refresh,
+    visit,
+    notify,
+    toast: (text: string) => setToast({ text, error: false }),
+  }
+
   function dirMenu(path: string): MenuItem[] {
     return [
       { label: 'Open', onSelect: () => visit(path) },
       { label: isPinned(path) ? 'Unpin' : 'Pin', onSelect: () => togglePin(path) },
       'separator',
-      { label: 'Open in File Explorer', onSelect: () => openPath(path) },
+      ...(shell ? [{ label: 'Open in File Explorer', onSelect: () => openPath(path) }] : []),
       { label: 'Copy path', onSelect: () => copyPath(path) },
     ]
   }
 
   function entryMenu(entry: FsEntry): MenuItem[] {
-    if (entry.is_dir) return dirMenu(entry.path)
+    const extra = ext?.entryItems?.(entry, ctx) ?? []
+    if (entry.is_dir) return extra.length ? [...dirMenu(entry.path), 'separator', ...extra] : dirMenu(entry.path)
     const convertTool = convertToolFor(entry.path)
     const pdfItems: MenuItem[] = isPdf(entry.path)
       ? [
@@ -218,9 +241,10 @@ export function FileBrowser({ selected, onSelect, onOpenInTool, filesVersion }: 
           : []
     return [
       { label: 'Open', onSelect: () => openPath(entry.path) },
-      { label: 'Show in File Explorer', onSelect: () => revealPath(entry.path) },
+      ...(shell ? [{ label: 'Show in File Explorer', onSelect: () => revealPath(entry.path) }] : []),
       'separator',
       ...pdfItems,
+      ...(extra.length ? [...extra, 'separator' as const] : []),
       { label: 'Copy path', onSelect: () => copyPath(entry.path) },
     ]
   }
@@ -233,7 +257,7 @@ export function FileBrowser({ selected, onSelect, onOpenInTool, filesVersion }: 
       { label: 'Move up', onSelect: () => pinAt(pin.path, index - 1), disabled: index === 0 },
       { label: 'Move down', onSelect: () => pinAt(pin.path, index + 1), disabled: index === pins.length - 1 },
       'separator',
-      { label: 'Open in File Explorer', onSelect: () => openPath(pin.path), disabled: !pin.exists },
+      ...(shell ? [{ label: 'Open in File Explorer', onSelect: () => openPath(pin.path), disabled: !pin.exists }] : []),
       { label: 'Copy path', onSelect: () => copyPath(pin.path) },
     ]
   }
@@ -244,7 +268,8 @@ export function FileBrowser({ selected, onSelect, onOpenInTool, filesVersion }: 
       { label: 'Refresh', onSelect: tree.refresh },
       { label: showHidden ? 'Hide hidden items' : 'Show hidden items', onSelect: toggleHidden },
       'separator',
-      { label: 'Open in File Explorer', onSelect: () => openPath(path) },
+      ...(ext?.folderItems ? [...ext.folderItems(path, ctx), 'separator' as const] : []),
+      ...(shell ? [{ label: 'Open in File Explorer', onSelect: () => openPath(path) }] : []),
       { label: 'Copy path', onSelect: () => copyPath(path) },
     ]
   }
@@ -266,10 +291,29 @@ export function FileBrowser({ selected, onSelect, onOpenInTool, filesVersion }: 
   const rootPinned = root !== null && isPinned(root)
 
   return (
-    <div className="browser" data-browser-state={tree.rootState?.status ?? 'loading'} onKeyDown={onPanelKeyDown}>
+    <div
+      className={cls('browser', dropping && 'is-dropping')}
+      data-browser-state={tree.rootState?.status ?? 'loading'}
+      onKeyDown={onPanelKeyDown}
+      onDragOver={(e) => {
+        if (!ext?.dropFiles || !root || !e.dataTransfer.types.includes('Files')) return
+        e.preventDefault()
+        setDropping(true)
+      }}
+      onDragLeave={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDropping(false)
+      }}
+      onDrop={(e) => {
+        setDropping(false)
+        if (!ext?.dropFiles || !root || !e.dataTransfer.files.length) return
+        e.preventDefault()
+        ext.dropFiles([...e.dataTransfer.files], root, ctx)
+      }}
+    >
       <div className="browser-head">
-        <span className="browser-title">Explorer</span>
+        <span className="browser-title">{ext?.title ?? 'Explorer'}</span>
         <div className="browser-actions">
+          {ext?.headerActions?.(ctx)}
           <IconButton
             label={showHidden ? 'Hide hidden items' : 'Show hidden items'}
             active={showHidden}

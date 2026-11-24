@@ -78,8 +78,11 @@ def _highlight(code: str, lang: str, _attrs: str) -> str:
     return f'<pre class="hl"><code>{highlight(code, lexer, _FORMATTER)}</code></pre>'
 
 
-def _embed(src: str, base_dir: Path | None) -> str:
-    """Turn a local image path into a data: URL so it shows in previews and PDFs alike."""
+def _embed(src: str, base_dir: Path | None, root: Path | None = None) -> str:
+    """Turn a local image path into a data: URL so it shows in previews and PDFs alike.
+
+    With ``root``, only files inside that folder are embedded (a server rendering a user's
+    Markdown must not read anyone else's files); others are left as they are."""
     parsed = urlparse(src)
     if parsed.scheme in ("http", "https", "data"):
         return src
@@ -91,6 +94,8 @@ def _embed(src: str, base_dir: Path | None) -> str:
         raw = Path(unquote(src))
         candidate = raw if raw.is_absolute() else (base_dir / raw if base_dir else raw)
     try:
+        if root is not None and not candidate.resolve().is_relative_to(root.resolve()):
+            return src
         if candidate.is_file() and candidate.stat().st_size <= MAX_EMBED_BYTES:
             mime = mimetypes.guess_type(candidate.name)[0] or "application/octet-stream"
             return f"data:{mime};base64," + base64.b64encode(candidate.read_bytes()).decode("ascii")
@@ -99,18 +104,22 @@ def _embed(src: str, base_dir: Path | None) -> str:
     return src
 
 
-def render_markdown(text: str, base_dir: str | None = None, theme: str = "github", title: str = "Document") -> str:
+def render_markdown(
+    text: str, base_dir: str | None = None, theme: str = "github", title: str = "Document", root: str | None = None
+) -> str:
+    """``root``: embed only local images inside this folder (see _embed)."""
     if theme not in THEMES:
         raise ValueError(f"Unknown theme: {theme!r}")
     md = MarkdownIt("commonmark", {"html": True, "typographer": True, "highlight": _highlight}).enable(
         ["table", "strikethrough"]
     )
     base = Path(base_dir) if base_dir else None
+    limit = Path(root) if root else None
     default_image = md.renderer.rules.get("image")
 
     def image(_renderer, tokens, idx, options, env):
         token = tokens[idx]
-        token.attrSet("src", _embed(token.attrGet("src") or "", base))
+        token.attrSet("src", _embed(token.attrGet("src") or "", base, limit))
         return default_image(tokens, idx, options, env)
 
     md.add_render_rule("image", image)

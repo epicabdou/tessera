@@ -315,10 +315,10 @@ class _Watchdog:
 
     def _end_all(self) -> None:
         """End Office and every helper the job started (an orphaned helper would wait forever)."""
-        import win32process
-
         _terminate(self.pid)
         if self._helpers:
+            import win32process
+
             for pid in win32process.EnumProcesses():
                 if pid and self._is_helper(pid):
                     _terminate(pid)

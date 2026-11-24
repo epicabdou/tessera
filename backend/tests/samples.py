@@ -100,8 +100,8 @@ def make_scan(path: Path, text: str = "Scanned invoice 4711") -> Path:
     draw = ImageDraw.Draw(img)
     try:
         font = ImageFont.truetype("arial.ttf", 64)
-    except OSError:
-        font = ImageFont.load_default()
+    except OSError:  # no Arial (Linux): the same size, so the words land in the same places
+        font = ImageFont.load_default(size=64)
     draw.text((120, 200), text, fill="black", font=font)
     draw.text((120, 320), "Total due 128 EUR", fill="black", font=font)
     img.save(path, "PDF", resolution=150)

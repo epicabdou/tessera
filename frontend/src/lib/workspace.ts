@@ -1,7 +1,27 @@
 import { createContext, useContext, useEffect, useRef } from 'react'
 import type { FsEntry } from './bridge'
 
-export type CategoryId = 'img-optimize' | 'img-layout' | 'img-ai' | 'img-edit' | 'pdf-pages' | 'to-pdf' | 'from-pdf' | 'edit' | 'security' | 'print' | 'latex'
+/**
+ * Tools and categories an app embedding this UI adds (see lib/platform.ts). It declares their ids
+ * by augmenting these interfaces, e.g. `declare module '…/lib/workspace' { interface CustomToolIds
+ * { workflows: true } }`, then adds the tool to CATEGORIES. Both are empty in the desktop app.
+ */
+export interface CustomCategoryIds {}
+export interface CustomToolIds {}
+
+export type CategoryId =
+  | 'img-optimize'
+  | 'img-layout'
+  | 'img-ai'
+  | 'img-edit'
+  | 'pdf-pages'
+  | 'to-pdf'
+  | 'from-pdf'
+  | 'edit'
+  | 'security'
+  | 'print'
+  | 'latex'
+  | keyof CustomCategoryIds
 
 export type ToolId =
   | 'pdf-merge'
@@ -44,6 +64,7 @@ export type ToolId =
   | 'img-blur-faces'
   | 'photo-editor'
   | 'img-watermark'
+  | keyof CustomToolIds
 
 /** "Open this path in that tool", e.g. from the file browser's context menu. */
 export interface ToolRequest {
