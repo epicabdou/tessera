@@ -426,9 +426,9 @@ Calls from JS run on pywebview worker threads, so slow work won't freeze the win
 
 ## Website and screenshots
 
-The website and user documentation have their own repository, [epicabdou/tilepress-website](https://github.com/epicabdou/tilepress-website) (VitePress). It's still served at <https://epicabdou.github.io/tilepress/>: its workflow publishes each build to this repo's `gh-pages` branch, which GitHub Pages serves. Leave that branch alone; every publish replaces it.
+The website and user documentation have their own private repository, `epicabdou/tilepress-website` (VitePress). It's still served at <https://epicabdou.github.io/tilepress/>: its workflow publishes each build to this repo's `gh-pages` branch, which GitHub Pages serves. Leave that branch alone; every publish replaces it.
 
-The screenshots are real: `scripts/screenshots.py` generates fictional demo files, runs the built UI against the real Python backend through a small local bridge, and captures it with headless Microsoft Edge. Browsing is confined to the demo folder, and the app's data folder is a temporary one, so nothing personal can appear. It writes them into the website repo, cloned next to this one (`..	ilepress-website`, or pass `--site <folder>`). After a UI change:
+The screenshots are real: `scripts/screenshots.py` generates fictional demo files, runs the built UI against the real Python backend through a small local bridge, and captures it with headless Microsoft Edge. Browsing is confined to the demo folder, and the app's data folder is a temporary one, so nothing personal can appear. It writes them into the website repo, cloned next to this one (`..\tilepress-website`, or pass `--site <folder>`). After a UI change:
 
 ```powershell
 cd frontend; npm run build; cd ..

@@ -1,6 +1,6 @@
 """Real screenshots of Tilepress for the website (public/screenshots/ and public/og.png).
 
-The website has its own repository, epicabdou/tilepress-website. Clone it next to this
+The website has its own private repository, epicabdou/tilepress-website. Clone it next to this
 one (..\\tilepress-website) and the files go straight into it, or pass --site <folder>.
 
 The real UI (frontend/dist) runs against the real Python backend, through a small local
